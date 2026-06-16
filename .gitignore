@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Node renderer
+renderer/node_modules/
+
+# Local data + generated artifacts
+.data/
+*.pdf
+render_document.json
+
+# Secrets
+.env
+
+# Fonts are fetched on demand (scripts/fetch_fonts.py), not committed
+themes/*/fonts/*.woff2
+themes/*/fonts/*.ttf
+themes/*/fonts/*.otf
