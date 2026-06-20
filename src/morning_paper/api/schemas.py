@@ -79,6 +79,25 @@ class ProfileOut(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
+# Feedback (👍/👎 on stories -> profile learning)
+# --------------------------------------------------------------------------- #
+class FeedbackIn(BaseModel):
+    vote: int = Field(description="+1 for 👍, -1 for 👎")
+    issue_id: str | None = None
+    story_id: str | None = None
+    section: str | None = None
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+
+
+class FeedbackOut(BaseModel):
+    id: str
+    user_id: str
+    vote: int
+    recorded_at: datetime
+
+
+# --------------------------------------------------------------------------- #
 # Themes
 # --------------------------------------------------------------------------- #
 class ThemeOut(BaseModel):

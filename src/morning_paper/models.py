@@ -106,6 +106,54 @@ class InterestProfile(BaseModel):
     version: int = 1
 
 
+class Feedback(BaseModel):
+    """In-product 👍/👎 on a rendered story, folded back into the profile.
+
+    The vote carries the topics/entities the story was about so it can nudge the
+    matching profile weights up (👍 = +1) or down (👎 = -1). It never stores
+    article text — only the labels — keeping the privacy invariant intact.
+    """
+
+    id: str
+    user_id: str
+    vote: Literal[1, -1]
+    issue_id: str | None = None
+    story_id: str | None = None
+    section: str | None = None
+    topics: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @classmethod
+    def make(
+        cls,
+        *,
+        user_id: str,
+        vote: int,
+        issue_id: str | None = None,
+        story_id: str | None = None,
+        section: str | None = None,
+        topics: list[str] | None = None,
+        entities: list[str] | None = None,
+        **kw,
+    ) -> "Feedback":
+        ts = datetime.now(timezone.utc)
+        basis = f"{user_id}:{issue_id}:{story_id}:{vote}:{ts.timestamp()}"
+        fid = hashlib.sha256(basis.encode()).hexdigest()[:24]
+        return cls(
+            id=fid,
+            user_id=user_id,
+            vote=1 if vote >= 0 else -1,
+            issue_id=issue_id,
+            story_id=story_id,
+            section=section,
+            topics=list(topics or []),
+            entities=list(entities or []),
+            created_at=ts,
+            **kw,
+        )
+
+
 # --------------------------------------------------------------------------- #
 # Candidates and stories (retrieval -> editorial)
 # --------------------------------------------------------------------------- #

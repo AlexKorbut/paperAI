@@ -105,6 +105,25 @@ def fetch_fonts(theme: str = typer.Option("", help="limit to one theme id")) -> 
     raise typer.Exit(code=subprocess.call(cmd))
 
 
+@app.command("render-web")
+def render_web(
+    theme: str = typer.Option("times-classic", help="theme id"),
+    out: Path = typer.Option(Path("issue.html"), help="output HTML path"),
+    locale: str = typer.Option("ru", help="output language"),
+) -> None:
+    """Render the sample issue as a self-contained responsive HTML page (no Chromium)."""
+    from .render.renderer import NodeRenderer, RenderError
+    from .sample import sample_render_document
+
+    doc = sample_render_document(theme, locale=locale)
+    try:
+        path = NodeRenderer().render_web(doc, out_path=out)
+    except RenderError as e:
+        typer.secho(f"web render failed: {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=1)
+    typer.secho(f"wrote {path}", fg=typer.colors.GREEN)
+
+
 # --------------------------------------------------------------------------- #
 # Accounts / preferences
 # --------------------------------------------------------------------------- #
@@ -395,6 +414,97 @@ def schedule(
         sched.schedule_user(user, hour=hour, minute=minute, tz=tz, job=lambda: _run(user))
         typer.secho("scheduler running (Ctrl-C to stop)", fg=typer.colors.GREEN)
         sched.start()
+
+
+# --------------------------------------------------------------------------- #
+# Feedback loop (👍/👎 -> profile learning)
+# --------------------------------------------------------------------------- #
+@app.command("feedback")
+def feedback_cmd(
+    user: str = typer.Option("me", help="user id"),
+    story: str = typer.Option("", "--story", help="story id the vote is about"),
+    issue: str = typer.Option("", "--issue", help="issue id (provenance)"),
+    up: bool = typer.Option(False, "--up", help="👍 more like this"),
+    down: bool = typer.Option(False, "--down", help="👎 less like this"),
+    topic: list[str] = typer.Option([], "--topic", help="topic(s) the story touched"),
+    entity: list[str] = typer.Option([], "--entity", help="entit(y/ies) the story was about"),
+    section: str = typer.Option("", "--section", help="section name (optional)"),
+) -> None:
+    """Record 👍/👎 on a story; it nudges the profile on the next build."""
+    from . import feedback as fb
+    from .models import Feedback
+
+    if up == down:
+        typer.secho("pick exactly one of --up / --down", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    if not topic and not entity:
+        typer.secho(
+            "give at least one --topic or --entity for the vote to learn from",
+            fg=typer.colors.YELLOW,
+        )
+    event = Feedback.make(
+        user_id=user,
+        vote=1 if up else -1,
+        issue_id=issue or None,
+        story_id=story or None,
+        section=section or None,
+        topics=list(topic),
+        entities=list(entity),
+    )
+    fb.record(event)
+    sign = "👍" if up else "👎"
+    typer.secho(
+        f"{sign} recorded for {user}: topics={list(topic)} entities={list(entity)}",
+        fg=typer.colors.GREEN,
+    )
+
+
+@app.command("feedback-list")
+def feedback_list(user: str = typer.Option("me", help="user id")) -> None:
+    """Show stored feedback events for a user."""
+    from . import feedback as fb
+
+    events = fb.load(user)
+    if not events:
+        typer.echo("no feedback yet")
+        return
+    for e in events:
+        sign = "👍" if e.vote > 0 else "👎"
+        labels = ", ".join(e.topics + e.entities)
+        typer.echo(f"{e.created_at.isoformat()}  {sign}  {e.story_id or '-'}  [{labels}]")
+
+
+# --------------------------------------------------------------------------- #
+# Privacy / data rights (GDPR/CCPA)
+# --------------------------------------------------------------------------- #
+@app.command("export-data")
+def export_data(
+    user: str = typer.Option("me", help="user id"),
+    out: Path = typer.Option(None, "--out", help="write JSON here (default: stdout)"),
+) -> None:
+    """Export everything stored for a user (secrets redacted)."""
+    from . import privacy
+
+    if out:
+        path = privacy.write_export(user, out)
+        typer.secho(f"wrote {path}", fg=typer.colors.GREEN)
+    else:
+        typer.echo(json.dumps(privacy.export_user_data(user), ensure_ascii=False, indent=2))
+
+
+@app.command("delete-data")
+def delete_data(
+    user: str = typer.Option("me", help="user id"),
+    yes: bool = typer.Option(False, "--yes", help="confirm irreversible deletion"),
+) -> None:
+    """Erase all stored data for a user (accounts, feedback, profile, signals)."""
+    from . import privacy
+
+    if not yes:
+        typer.secho("refusing to delete without --yes (irreversible)", fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    summary = privacy.delete_user_data(user)
+    typer.secho(f"deleted data for {user}: {summary['removed']}", fg=typer.colors.GREEN)
 
 
 # --------------------------------------------------------------------------- #

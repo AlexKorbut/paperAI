@@ -54,6 +54,32 @@ function pageRule(manifest) {
   return `@page {\n  size: ${size}${orient};${bleedRule}${marks}\n}`;
 }
 
+// Screen-only overrides for the responsive web edition: centre the "sheet", give
+// it depth, and collapse the dense print columns as the viewport narrows so the
+// same content reads comfortably on a phone. Print/PDF is unaffected (@media screen).
+function webCss() {
+  return `@media screen {
+  html, body { background: #e9e9ee; -webkit-text-size-adjust: 100%; }
+  main.paper {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 32px;
+    background: var(--paper);
+    box-shadow: 0 2px 28px rgba(0,0,0,0.18);
+  }
+  .story__photo img { max-width: 100%; height: auto; }
+}
+@media screen and (max-width: 820px) {
+  .section__grid, .lead .story__body { column-count: 2 !important; }
+}
+@media screen and (max-width: 560px) {
+  .section__grid, .lead .story__body { column-count: 1 !important; }
+  main.paper { padding: 18px; margin: 0; }
+  .masthead__title, .masthead__logo svg { font-size: 11vw; max-height: 14vw; }
+  .lead .story__headline { font-size: 8vw; }
+}`;
+}
+
 function storyArticle(view, slot) {
   if (!view) return "";
   const cls = `story story--${slot.size}`;
@@ -111,7 +137,7 @@ function renderSections(doc) {
   return leadHtml + "\n" + sections;
 }
 
-export async function composeHtml(doc, { themesDir, assetsDir, rendererDir }) {
+export async function composeHtml(doc, { themesDir, assetsDir, rendererDir, web = false }) {
   const warnings = [];
   const themeDir = path.join(themesDir, doc.theme_id);
   const manifestPath = path.join(themeDir, "theme.toml");
@@ -160,12 +186,14 @@ export async function composeHtml(doc, { themesDir, assetsDir, rendererDir }) {
 <html lang="${esc(doc.locale || "ru")}">
 <head>
 <meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
 <style>
 ${fontCss}
 ${pageRule(manifest)}
 ${cssVarsBlock(manifest)}
 ${baseCss}
 ${themeCss}
+${web ? webCss() : ""}
 </style>
 </head>
 <body data-theme="${esc(doc.theme_id)}">
