@@ -7,9 +7,42 @@ from fastapi.responses import FileResponse
 
 from ..deps import Principal, get_principal, get_store, require_owner
 from ..jobs import issue_status, submit_issue
-from ..schemas import CostOut, IssueCreate, IssueStatusOut, JobOut
+from ..schemas import CostOut, IssueCreate, IssueStatusOut, IssueSummary, JobOut
 
 router = APIRouter(tags=["issues"])
+
+
+@router.get("/users/{user_id}/issues", response_model=list[IssueSummary])
+def list_issues(
+    user_id: str, principal: Principal = Depends(get_principal)
+) -> list[IssueSummary]:
+    """History of a user's issues (newest first). Empty without a DB layer."""
+    require_owner(principal, user_id)
+    try:
+        from ...db.repository import list_user_issues
+
+        rows = list_user_issues(user_id)
+    except Exception:
+        rows = []
+
+    out: list[IssueSummary] = []
+    for r in rows:
+        pdf_url = None
+        if r.get("pdf_key"):
+            try:
+                pdf_url = get_store().url(r["pdf_key"])
+            except Exception:
+                pdf_url = None
+        out.append(
+            IssueSummary(
+                id=r["id"],
+                theme_id=r.get("theme_id"),
+                status=r.get("status", "unknown"),
+                pdf_url=pdf_url,
+                created_at=r.get("created_at"),
+            )
+        )
+    return out
 
 
 @router.post("/users/{user_id}/issues", status_code=202, response_model=JobOut)

@@ -139,6 +139,14 @@ class IssueStatusOut(BaseModel):
     cost: CostOut = Field(default_factory=CostOut)
 
 
+class IssueSummary(BaseModel):
+    id: str
+    theme_id: str | None = None
+    status: str
+    pdf_url: str | None = None
+    created_at: str | None = None
+
+
 # --------------------------------------------------------------------------- #
 # Render (stateless)
 # --------------------------------------------------------------------------- #
