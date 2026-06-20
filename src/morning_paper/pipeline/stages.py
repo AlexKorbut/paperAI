@@ -81,11 +81,19 @@ def s2_profile(ctx: IssueContext, **kwargs) -> IssueContext:
             )
         except Exception as exc:
             logger.warning("metered client unavailable for profile: %s", exc)
+        embedder = None
+        try:
+            from ..embeddings import get_embedder
+
+            embedder = get_embedder()
+        except Exception as exc:
+            logger.warning("embedder unavailable for profile: %s", exc)
         ctx.profile = build_profile(
             ctx.user_id,
             ctx.signals,
             output_lang=ctx.output_lang,
             client=client,
+            embedder=embedder,
         )
     except Exception as exc:
         logger.warning("profile build failed: %s", exc)
@@ -96,30 +104,89 @@ def s2_profile(ctx: IssueContext, **kwargs) -> IssueContext:
 
 
 def s3_retrieve(ctx: IssueContext, feed_urls: list[str] = (), **kwargs) -> IssueContext:
-    """Fetch candidate articles based on profile topics."""
+    """Fetch candidate articles: RSS + multilingual GDELT (+ NewsAPI if keyed).
+
+    RSS gives a reliable baseline; GDELT broadens the net across languages using
+    terms derived from the profile, so the multilingual selection promised by the
+    product actually has multilingual candidates to choose from.
+    """
+    from ..config import get_settings
     from ..retrieval.feeds import fetch_rss_candidates
 
+    settings = get_settings()
+    rconf = settings.file.retrieval
     urls = list(feed_urls) if feed_urls else _DEFAULT_FEEDS
 
-    try:
-        ctx.candidates = fetch_rss_candidates(urls, max_per_feed=20)
-    except Exception as exc:
-        logger.warning("retrieve failed: %s", exc)
-        ctx.candidates = []
+    candidates: list = []
 
+    # RSS baseline (always on).
+    try:
+        candidates.extend(fetch_rss_candidates(urls, max_per_feed=20))
+    except Exception as exc:
+        logger.warning("RSS retrieve failed: %s", exc)
+
+    # Profile-driven external retrieval (multilingual). Needs a profile to query.
+    terms: list[str] = []
+    if ctx.profile is not None:
+        from ..retrieval.query import profile_query_terms
+
+        terms = profile_query_terms(ctx.profile, max_terms=8)
+
+    if terms and rconf.gdelt_enabled:
+        try:
+            from ..retrieval.gdelt import fetch_gdelt_candidates
+
+            candidates.extend(
+                fetch_gdelt_candidates(
+                    terms,
+                    max_records=rconf.gdelt_max_records,
+                    timespan=rconf.gdelt_timespan,
+                    source_langs=rconf.source_langs,
+                )
+            )
+        except Exception as exc:
+            logger.warning("GDELT retrieve failed: %s", exc)
+
+    newsapi_key = settings.secrets.newsapi_key
+    if terms and newsapi_key:
+        try:
+            from ..retrieval.newsapi import fetch_newsapi_candidates
+
+            candidates.extend(
+                fetch_newsapi_candidates(terms, api_key=newsapi_key, page_size=50)
+            )
+        except Exception as exc:
+            logger.warning("NewsAPI retrieve failed: %s", exc)
+
+    ctx.candidates = candidates[: rconf.max_candidates]
     return ctx
 
 
 def s4_rank(ctx: IssueContext, **kwargs) -> IssueContext:
-    """Score candidates against profile, dedup, keep top 40."""
+    """Score candidates against profile (semantic + keyword), dedup, keep top 40."""
+    from ..config import get_settings
     from ..retrieval.rank import rank_candidates
     from ..retrieval.dedup import dedup_candidates
     from ..models import InterestProfile
 
     profile = ctx.profile or InterestProfile(user_id=ctx.user_id, output_lang=ctx.output_lang)
 
+    embedder = None
     try:
-        ranked = rank_candidates(ctx.candidates, profile, top_n=40)
+        from ..embeddings import get_embedder
+
+        embedder = get_embedder()
+    except Exception as exc:
+        logger.warning("embedder unavailable for ranking: %s", exc)
+
+    try:
+        ranked = rank_candidates(
+            ctx.candidates,
+            profile,
+            top_n=40,
+            embedder=embedder,
+            semantic_weight=get_settings().file.embeddings.semantic_weight,
+        )
         ctx.ranked = dedup_candidates(ranked)
     except Exception as exc:
         logger.warning("rank/dedup failed: %s", exc)
