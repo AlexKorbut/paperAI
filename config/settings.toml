@@ -17,7 +17,12 @@ use_prompt_cache = true   # cache stable system-prompt prefixes (-90% on cache r
 [embeddings]
 provider = "voyage"
 model = "voyage-3.5"      # multilingual
+semantic_weight = 0.6     # ranking blend: 0 = keywords only, 1 = embeddings only
 
 [retrieval]
 max_candidates = 300
 final_stories = 30
+gdelt_enabled = true      # multilingual candidate retrieval via GDELT (no key needed)
+gdelt_timespan = "1d"     # lookback window
+gdelt_max_records = 75
+source_langs = []         # empty = every language; e.g. ["English","Russian"] to restrict

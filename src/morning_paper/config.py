@@ -32,14 +32,29 @@ class LLMOptions(BaseModel):
     use_prompt_cache: bool = True
 
 
+class EmbeddingsConfig(BaseModel):
+    provider: str = "voyage"
+    model: str = "voyage-3.5"          # multilingual embedding model
+    semantic_weight: float = 0.6       # blend: semantic vs keyword in ranking (0..1)
+
+
+class RetrievalConfig(BaseModel):
+    max_candidates: int = 300
+    final_stories: int = 30
+    gdelt_enabled: bool = True
+    gdelt_timespan: str = "1d"         # GDELT lookback window (e.g. 1d, 12h)
+    gdelt_max_records: int = 75
+    source_langs: list[str] = []       # empty = accept every source language
+
+
 class FileConfig(BaseModel):
     """The parsed contents of settings.toml."""
 
     defaults: Defaults = Defaults()
     models: ModelRouting = ModelRouting()
     llm: LLMOptions = LLMOptions()
-    embeddings: dict = {}
-    retrieval: dict = {}
+    embeddings: EmbeddingsConfig = EmbeddingsConfig()
+    retrieval: RetrievalConfig = RetrievalConfig()
 
 
 class Secrets(BaseSettings):
