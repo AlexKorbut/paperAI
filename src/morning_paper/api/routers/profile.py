@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 
 from ..deps import Principal, get_principal, require_owner
 from ..jobs import submit_issue
-from ..schemas import JobOut, ProfileOut
+from ..schemas import FeedbackIn, FeedbackOut, JobOut, ProfileOut
 
 router = APIRouter(tags=["profile"])
 
@@ -44,4 +44,31 @@ def get_profile(
         entities=dict(profile.entities),
         version=profile.version,
         updated_at=profile.updated_at,
+    )
+
+
+@router.post("/users/{user_id}/feedback", response_model=FeedbackOut, status_code=201)
+def post_feedback(
+    user_id: str, body: FeedbackIn, principal: Principal = Depends(get_principal)
+) -> FeedbackOut:
+    """Record 👍/👎 on a story. Folded into the profile on the next build."""
+    require_owner(principal, user_id)
+    if body.vote not in (1, -1):
+        raise HTTPException(422, "vote must be +1 or -1")
+
+    from ... import feedback as fb
+    from ...models import Feedback
+
+    event = Feedback.make(
+        user_id=user_id,
+        vote=body.vote,
+        issue_id=body.issue_id,
+        story_id=body.story_id,
+        section=body.section,
+        topics=body.topics,
+        entities=body.entities,
+    )
+    fb.record(event)
+    return FeedbackOut(
+        id=event.id, user_id=user_id, vote=event.vote, recorded_at=event.created_at
     )

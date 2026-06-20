@@ -77,6 +77,22 @@ morning-paper run-issue --user me
 Без ключей пайплайн не падает: стадии с LLM деградируют (сырой пересказ вместо
 переписанного), и ты всё равно получаешь свёрстанный PDF.
 
+## 3a. Обратная связь, веб-версия, приватность
+
+```bash
+# 👍/👎 по заметке -> дообучение профиля на следующем build-profile
+morning-paper feedback --user me --story s-ai --up --topic технологии/ИИ --entity Anthropic
+morning-paper feedback --user me --story s-sport --down --topic спорт/футбол
+morning-paper feedback-list --user me
+
+# веб-версия газеты (адаптивный self-contained HTML, без Chromium)
+morning-paper render-web --theme infographic --out issue.html
+
+# права на данные (GDPR/CCPA)
+morning-paper export-data --user me --out my-data.json   # секреты вырезаны
+morning-paper delete-data --user me --yes                # необратимо
+```
+
 ## 4. Автоматизация (каждое утро)
 
 ```bash

@@ -276,6 +276,61 @@ def get_issue(issue_id: str, *, url=None, engine=None) -> dict | None:
         }
 
 
+def list_user_issues(user_id: str, *, url=None, engine=None) -> list[dict]:
+    """All issue rows for a user (newest first)."""
+    from sqlalchemy import select
+
+    from .engine import get_session
+    from .schema import IssueRow
+
+    with get_session(engine=_engine(url, engine)) as s:
+        rows = s.scalars(
+            select(IssueRow).where(IssueRow.user_id == user_id).order_by(IssueRow.created_at.desc())
+        ).all()
+        return [
+            {
+                "id": r.id,
+                "theme_id": r.theme_id,
+                "status": r.status,
+                "pdf_key": r.pdf_key,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r in rows
+        ]
+
+
+def delete_user(user_id: str, *, url=None, engine=None) -> int:
+    """Erase every row we hold for a user (GDPR/CCPA). Returns rows deleted."""
+    from sqlalchemy import delete
+
+    from .engine import get_session
+    from .schema import (
+        InterestProfileRow,
+        InterestVectorRow,
+        IssueRow,
+        SignalRow,
+        SourceAccount,
+        UsageEventRow,
+        User,
+    )
+
+    deleted = 0
+    with get_session(engine=_engine(url, engine)) as s:
+        for model, col in (
+            (InterestVectorRow, InterestVectorRow.user_id),
+            (InterestProfileRow, InterestProfileRow.user_id),
+            (SignalRow, SignalRow.user_id),
+            (SourceAccount, SourceAccount.user_id),
+            (IssueRow, IssueRow.user_id),
+            (UsageEventRow, UsageEventRow.user_id),
+            (User, User.id),
+        ):
+            result = s.execute(delete(model).where(col == user_id))
+            deleted += result.rowcount or 0
+        s.commit()
+    return deleted
+
+
 def record_usage(
     *,
     user_id: str,

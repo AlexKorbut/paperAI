@@ -90,6 +90,45 @@ class NodeRenderer:
         result = _parse_stdout(proc.stdout)
         return RenderResult(pdf_path=str(out_path), **result)
 
+    def render_web(self, doc: RenderDocument, *, out_path: Path) -> Path:
+        """Render a self-contained responsive HTML edition via renderer/web.mjs."""
+        if shutil.which(self.node_bin) is None:
+            raise RenderError(
+                f"`{self.node_bin}` not found. Install Node and run "
+                "`make install-node` in morning-paper/renderer."
+            )
+        entry = self.renderer_dir / "web.mjs"
+        if not entry.exists():
+            raise RenderError(f"web renderer entry not found: {entry}")
+
+        out_path = out_path.resolve()
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".json", delete=False, encoding="utf-8"
+        ) as fh:
+            json.dump(doc.model_dump(), fh, ensure_ascii=False)
+            in_path = Path(fh.name)
+
+        cmd = [
+            self.node_bin,
+            str(entry),
+            "--in", str(in_path),
+            "--out", str(out_path),
+            "--themes", str(self.themes_dir),
+            "--assets", str(_object_store_root()),
+        ]
+        try:
+            proc = subprocess.run(cmd, capture_output=True, text=True)
+        finally:
+            in_path.unlink(missing_ok=True)
+
+        if proc.returncode != 0:
+            raise RenderError(
+                f"web renderer failed (exit {proc.returncode}):\n{proc.stderr.strip()}"
+            )
+        return out_path
+
 
 def _object_store_root() -> Path:
     url = get_settings().secrets.mp_object_store_url

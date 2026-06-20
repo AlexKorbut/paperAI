@@ -11,6 +11,27 @@ from ..schemas import UserOut, UserUpdate
 router = APIRouter(tags=["users"])
 
 
+# --------------------------------------------------------------------------- #
+# Privacy / data rights (GDPR/CCPA)
+# --------------------------------------------------------------------------- #
+@router.get("/users/{user_id}/data:export")
+def export_data(user_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    """Export everything stored for the user (secrets redacted)."""
+    require_owner(principal, user_id)
+    from ... import privacy
+
+    return privacy.export_user_data(user_id)
+
+
+@router.delete("/users/{user_id}/data")
+def delete_data(user_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    """Erase all stored data for the user (irreversible)."""
+    require_owner(principal, user_id)
+    from ... import privacy
+
+    return privacy.delete_user_data(user_id)
+
+
 def _to_out(acc: accounts.UserAccounts) -> UserOut:
     return UserOut(
         user_id=acc.user_id,

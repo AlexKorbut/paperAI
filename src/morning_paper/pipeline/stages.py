@@ -88,12 +88,28 @@ def s2_profile(ctx: IssueContext, **kwargs) -> IssueContext:
             embedder = get_embedder()
         except Exception as exc:
             logger.warning("embedder unavailable for profile: %s", exc)
+        existing = None
+        try:
+            from ..db.repository import load_profile
+
+            existing = load_profile(ctx.user_id)
+        except Exception as exc:
+            logger.debug("no stored profile to extend: %s", exc)
+        feedback = []
+        try:
+            from ..feedback import load as load_feedback
+
+            feedback = load_feedback(ctx.user_id)
+        except Exception as exc:
+            logger.warning("feedback load failed: %s", exc)
         ctx.profile = build_profile(
             ctx.user_id,
             ctx.signals,
+            existing=existing,
             output_lang=ctx.output_lang,
             client=client,
             embedder=embedder,
+            feedback=feedback,
         )
     except Exception as exc:
         logger.warning("profile build failed: %s", exc)
