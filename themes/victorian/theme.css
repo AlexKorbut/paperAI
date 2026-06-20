@@ -1,0 +1,184 @@
+/* victorian: 1860s English penny-broadsheet aesthetic.
+   Aged rag paper, blackletter (Fraktur) masthead, dramatic Didone headlines,
+   antique IM Fell English body, heavy thick-thin ornamental rules and large
+   engraved drop caps. Modelled on the mid-Victorian provincial newspaper. */
+
+:root[data-theme="victorian"] {
+  --masthead-font: "UnifrakturCook";
+  --headline-font: "Playfair Display";
+  --body-font: "IM Fell English";
+}
+
+body[data-theme="victorian"] {
+  font-family: "IM Fell English", "Playfair Display", Georgia, "Times New Roman", serif;
+  background: #e7dcc1;
+  color: #241a0d;
+}
+
+/* Faint mottled foxing on the paper, like aged rag stock. */
+[data-theme="victorian"] main.paper {
+  border: 1px solid var(--ink);
+  outline: 3px double var(--ink);
+  outline-offset: 2px;
+  padding: 5mm;
+  background-image:
+    radial-gradient(circle at 18% 12%, rgba(90, 50, 16, 0.05) 0 22%, transparent 60%),
+    radial-gradient(circle at 82% 78%, rgba(90, 50, 16, 0.06) 0 20%, transparent 55%);
+}
+
+/* ---- Masthead ----------------------------------------------------------- */
+[data-theme="victorian"] .masthead {
+  border-top: 4px double var(--ink);
+  border-bottom: 4px double var(--ink);
+  padding: 5mm 0 3mm;
+  margin-bottom: 4mm;
+  text-align: center;
+  position: relative;
+}
+
+[data-theme="victorian"] .masthead__title,
+[data-theme="victorian"] .masthead__logo {
+  font-family: "UnifrakturCook", "Playfair Display", Georgia, serif;
+  font-size: 74pt;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 1px;
+  color: #241a0d;
+}
+
+[data-theme="victorian"] .masthead__logo svg { max-height: 92px; }
+
+[data-theme="victorian"] .masthead__meta {
+  justify-content: center;
+  gap: 26px;
+  font-family: "IM Fell English", serif;
+  font-size: 8pt;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #241a0d;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 2.5mm;
+}
+
+/* ---- Section title: centred small-caps between ornamental rules --------- */
+[data-theme="victorian"] .section__title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 12pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  text-align: center;
+  border-top: 3px double var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 1mm 0;
+  margin: 0 0 3mm;
+}
+[data-theme="victorian"] .section__title::before,
+[data-theme="victorian"] .section__title::after {
+  content: "\2766"; /* floral heart bullet */
+  margin: 0 10px;
+  font-size: 10pt;
+  vertical-align: 2px;
+  color: var(--accent);
+}
+
+/* ---- Column rules: hairline, period-dense ------------------------------- */
+[data-theme="victorian"] .section__grid {
+  column-rule: 0.75px solid color-mix(in srgb, var(--ink) 55%, transparent);
+}
+[data-theme="victorian"] .lead .story__body {
+  column-rule: 0.75px solid color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+/* ---- Headlines: dramatic centred Didone --------------------------------- */
+[data-theme="victorian"] .story__headline {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 700;
+  font-size: 16pt;
+  line-height: 1.05;
+  text-align: center;
+  letter-spacing: 0.2px;
+  margin: 0 0 1.5mm;
+}
+[data-theme="victorian"] .lead .story__headline {
+  font-size: 40pt;
+  line-height: 1;
+  letter-spacing: -0.5px;
+}
+[data-theme="victorian"] .story--brief .story__headline {
+  font-size: 11.5pt;
+}
+
+/* ---- Deck: italic, centred, with a hanging rule ------------------------- */
+[data-theme="victorian"] .story__deck {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  font-size: 10pt;
+  text-align: center;
+  color: color-mix(in srgb, #241a0d 85%, transparent);
+  padding-bottom: 1.5mm;
+  margin-bottom: 2mm;
+  border-bottom: 0.75px solid color-mix(in srgb, var(--ink) 45%, transparent);
+}
+
+/* ---- Drop cap: large engraved initial ----------------------------------- */
+[data-theme="victorian"] .story__body p:first-of-type::first-letter {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 700;
+  font-size: 4.4em;
+  line-height: 0.72;
+  float: left;
+  padding: 1px 4px 0 0;
+  color: #241a0d;
+}
+
+/* ---- Pull quote: centred italic between double rules -------------------- */
+[data-theme="victorian"] .story__pull {
+  font-family: "IM Fell English", serif;
+  font-size: 13pt;
+  font-style: italic;
+  text-align: center;
+  letter-spacing: 0.2px;
+  border-top: 3px double var(--ink);
+  border-bottom: 3px double var(--ink);
+  padding: 2mm 0;
+  margin: 2.5mm 0;
+}
+
+/* ---- Body: antique justified text --------------------------------------- */
+[data-theme="victorian"] .story__body p {
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 10pt;
+  line-height: 1.34;
+  color: #241a0d;
+  text-align: justify;
+  margin: 0 0 1.5mm;
+}
+
+/* ---- Byline: small-cap italic ------------------------------------------- */
+[data-theme="victorian"] .story__byline {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  text-align: center;
+  color: var(--accent);
+}
+
+/* ---- Photo: framed engraving with a thin border ------------------------- */
+[data-theme="victorian"] .story__photo img {
+  border: 1px solid var(--ink);
+  filter: grayscale(1) contrast(1.08) sepia(0.12);
+}
+[data-theme="victorian"] .story__photo figcaption {
+  font-family: "IM Fell English", serif;
+  font-style: italic;
+  font-size: 7pt;
+  text-align: center;
+  letter-spacing: 0.5px;
+  margin-top: 1mm;
+}

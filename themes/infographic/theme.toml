@@ -1,0 +1,46 @@
+schema_version = 1
+id            = "infographic"
+display_name  = "Инфографика — современная газета данных"
+mood          = "современная российская инфографическая газета, белый лист, гротеск в заголовках, цветные плашки секций, синий и красный акцент, плотная модульная сетка"
+
+[format]
+page        = "broadsheet"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "color"
+
+[grid]
+columns       = 6
+rule_weight   = "1px"
+gutter        = "12px"
+section_order = ["главное", "город", "экономика", "технологии"]
+max_lead      = 1
+
+[type]
+masthead_font = "IBM Plex Sans"
+headline_font = "IBM Plex Sans"
+body_font     = "PT Serif"
+scale         = "modern"
+hyphenate     = true
+
+[colors]
+paper  = "#ffffff"
+ink    = "#15191f"
+accent = "#0b63b8"
+
+[photo]
+treatment    = "color"
+max_width_px = 1600
+
+[[fonts]]
+family  = "IBM Plex Sans"
+files   = ["fonts/IBMPlexSans-Regular.woff2", "fonts/IBMPlexSans-Medium.woff2", "fonts/IBMPlexSans-Bold.woff2"]
+license = "OFL-1.1"
+
+[[fonts]]
+family  = "PT Serif"
+files   = ["fonts/PTSerif-Regular.woff2", "fonts/PTSerif-Bold.woff2", "fonts/PTSerif-Italic.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"

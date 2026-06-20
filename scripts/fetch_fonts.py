@@ -37,7 +37,7 @@ GOOGLE_SPECIMEN = "https://fonts.google.com/specimen"
 
 # Themes that need Cyrillic glyphs; their fonts are requested with the
 # cyrillic subset in addition to the Latin subsets.
-CYRILLIC_THEMES = {"old-russian"}
+CYRILLIC_THEMES = {"old-russian", "infographic"}
 
 DEFAULT_SUBSETS = ["latin", "latin-ext"]
 CYRILLIC_SUBSETS = ["latin", "latin-ext", "cyrillic"]

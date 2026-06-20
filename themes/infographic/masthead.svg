@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 110" role="img" aria-label="Утренняя Газета">
+  <!-- Red index block on the left, echoing the spread's section tab -->
+  <rect x="0" y="14" width="26" height="64" fill="#d8232a"/>
+
+  <!-- Bold grotesque wordmark -->
+  <text x="44" y="66"
+        text-anchor="start"
+        font-family="'IBM Plex Sans', Arial, sans-serif"
+        font-size="54"
+        font-weight="700"
+        letter-spacing="-1.5"
+        fill="#15191f"
+        style="text-transform: uppercase;">УТРЕННЯЯ ГАЗЕТА</text>
+
+  <!-- Accent strapline -->
+  <text x="46" y="92"
+        text-anchor="start"
+        font-family="'IBM Plex Sans', Arial, sans-serif"
+        font-size="13"
+        font-weight="500"
+        letter-spacing="3"
+        fill="#0b63b8"
+        style="text-transform: uppercase;">ДАННЫЕ &#183; ГОРОД &#183; ЭКОНОМИКА &#183; ТЕХНОЛОГИИ</text>
+
+  <!-- Thick blue baseline rule -->
+  <rect x="0" y="102" width="900" height="4" fill="#0b63b8"/>
+</svg>

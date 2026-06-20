@@ -96,11 +96,13 @@ morning-paper schedule --user me --at 05:00 --run    # блокирующий п
 | `TELEGRAM_BOT_TOKEN` | доставка газеты в Telegram-бота |
 | `RESEND_API_KEY` | доставка по email |
 
-## Стили (8 тем)
+## Стили (10 тем)
 
 `times-classic` · `economist` · `nyt-modern` · `mono-minimal` ·
 `old-russian` (дореволюционный, кириллица) · `vintage` (1920s broadsheet) ·
-`art-nouveau` (Belle Époque) · `swiss-grotesk` (Bauhaus/International).
+`art-nouveau` (Belle Époque) · `swiss-grotesk` (Bauhaus/International) ·
+`victorian` (английский broadsheet 1860-х, блэклеттер) ·
+`infographic` (современная инфографика, кириллица).
 
 ## Приватность
 
