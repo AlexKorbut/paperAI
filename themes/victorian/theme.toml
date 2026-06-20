@@ -1,0 +1,51 @@
+schema_version = 1
+id            = "victorian"
+display_name  = "Victorian — 1860s English Broadsheet"
+mood          = "Victorian penny broadsheet, aged rag paper, blackletter masthead, woodcut ornaments, dense hairline columns"
+
+[format]
+page        = "broadsheet"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "bw"
+
+[grid]
+columns       = 6
+rule_weight   = "0.75px"
+gutter        = "7px"
+section_order = ["town", "crown", "commerce", "notices"]
+max_lead      = 1
+
+[type]
+masthead_font = "UnifrakturCook"
+headline_font = "Playfair Display"
+body_font     = "IM Fell English"
+scale         = "classic"
+hyphenate     = true
+
+[colors]
+paper  = "#e7dcc1"
+ink    = "#241a0d"
+accent = "#5a3210"
+
+[photo]
+treatment    = "bw"
+max_width_px = 1400
+
+[[fonts]]
+family  = "UnifrakturCook"
+files   = ["fonts/UnifrakturCook-Bold.woff2"]
+license = "OFL-1.1"
+
+[[fonts]]
+family  = "Playfair Display"
+files   = ["fonts/PlayfairDisplay-Regular.woff2", "fonts/PlayfairDisplay-Bold.woff2", "fonts/PlayfairDisplay-Italic.woff2"]
+license = "OFL-1.1"
+
+[[fonts]]
+family  = "IM Fell English"
+files   = ["fonts/IMFellEnglish-Regular.woff2", "fonts/IMFellEnglish-Italic.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"
