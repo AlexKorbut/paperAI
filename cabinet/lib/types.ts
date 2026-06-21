@@ -98,3 +98,69 @@ export interface IssueCreate {
   output_lang?: string | null;
   feed_urls?: string[];
 }
+
+// ---- Phase 3: print, groups, marketplace -------------------------------- //
+export interface PrintProvider {
+  provider_id: string;
+  display_name: string;
+  supported_formats: string[];
+  min_total_usd: number;
+}
+
+export interface PrintQuote {
+  provider: string;
+  format: string;
+  pages: number;
+  copies: number;
+  unit_price_usd: number;
+  shipping_usd: number;
+  total_usd: number;
+  currency: string;
+  estimate: boolean;
+}
+
+export interface PrintAddress {
+  name: string;
+  line1: string;
+  line2?: string;
+  city?: string;
+  postcode?: string;
+  country: string;
+}
+
+export interface PrintOrder {
+  id: string;
+  user_id: string;
+  provider: string;
+  format: string;
+  pages: number;
+  copies: number;
+  address: PrintAddress;
+  quote: PrintQuote;
+  issue_id?: string | null;
+  status: string;
+  provider_order_id?: string | null;
+  created_at: string;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  owner: string;
+  members: string[];
+  theme?: string | null;
+  output_lang?: string | null;
+  created_at: string;
+}
+
+export interface MarketplaceTheme {
+  id: string;
+  display_name: string;
+  mood: string;
+  author: string;
+  price_usd: number;
+  homepage: string;
+  license: string;
+  builtin: boolean;
+  third_party: boolean;
+}

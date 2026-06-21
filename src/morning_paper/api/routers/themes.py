@@ -27,6 +27,8 @@ def list_themes() -> list[ThemeOut]:
                     "ink": m.colors.ink,
                     "accent": m.colors.accent,
                 },
+                author=m.marketplace.author,
+                price_usd=m.marketplace.price_usd,
             )
         )
     return out

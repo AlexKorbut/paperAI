@@ -26,6 +26,7 @@ def run_issue(
     until_stage: int = 8,
     feed_urls: list[str] = (),
     issue_id: str | None = None,
+    seed_profile=None,
     **kwargs,
 ) -> IssueContext:
     # Fall back to the user's saved preferences when caller doesn't override.
@@ -46,6 +47,12 @@ def run_issue(
         output_lang=output_lang,
         work_dir=work_dir,
     )
+
+    # A pre-built profile (e.g. a group's merged interests) skips ingest+profile.
+    if seed_profile is not None:
+        ctx.profile = seed_profile
+        if from_stage < 3:
+            from_stage = 3
 
     for stage_fn in STAGES[from_stage - 1 : until_stage]:
         ctx = stage_fn(ctx, feed_urls=feed_urls, **kwargs)

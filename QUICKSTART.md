@@ -93,6 +93,26 @@ morning-paper export-data --user me --out my-data.json   # секреты выр
 morning-paper delete-data --user me --yes                # необратимо
 ```
 
+## 3b. Печать, группы, маркетплейс (Фаза 3)
+
+```bash
+# печать по требованию (цена — оценка; реальная отправка по ключу провайдера)
+morning-paper print-quote --provider newspaper_club --format tabloid --pages 8 --copies 2
+morning-paper print-order --user me --issue <issue-id> --provider mixam --format a3 \
+  --copies 3 --to-name "Имя" --to-line1 "Улица 1" --to-country DE
+
+# семейная/командная подписка: одна газета на нескольких
+morning-paper group-create --name "Семья" --owner me --member partner --member kid --theme old-russian
+morning-paper run-group-issue --group <group-id>        # общий выпуск всем участникам
+
+# маркетплейс тем (темы — это данные)
+morning-paper themes-marketplace
+morning-paper install-theme --path ./my-theme           # каталог или .zip
+morning-paper package-theme --theme my-theme --out my-theme.zip
+```
+
+Веб-кабинет (`cabinet/`) даёт эти же действия на страницах **Печать**, **Группы**, **Маркетплейс**.
+
 ## 4. Автоматизация (каждое утро)
 
 ```bash

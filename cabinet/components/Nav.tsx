@@ -12,6 +12,9 @@ const LINKS: [string, string][] = [
   ["/themes", "Стили"],
   ["/profile", "Профиль"],
   ["/issues", "Выпуски"],
+  ["/print", "Печать"],
+  ["/groups", "Группы"],
+  ["/marketplace", "Маркетплейс"],
   ["/privacy", "Приватность"],
 ];
 

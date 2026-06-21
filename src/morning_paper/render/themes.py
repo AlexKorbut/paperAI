@@ -65,11 +65,21 @@ class AssetSpec(BaseModel):
     masthead: str | None = None
 
 
+class MarketplaceSpec(BaseModel):
+    """Optional marketplace metadata for third-party / premium themes."""
+
+    author: str = ""
+    price_usd: float = 0.0
+    homepage: str = ""
+    license: str = ""  # theme (CSS/SVG) license, distinct from bundled font licenses
+
+
 class ThemeManifest(BaseModel):
     schema_version: int = 1
     id: str
     display_name: str
     mood: str = ""
+    marketplace: MarketplaceSpec = MarketplaceSpec()
     format: FormatSpec = FormatSpec()
     grid: GridSpec = GridSpec()
     type: TypeSpec
