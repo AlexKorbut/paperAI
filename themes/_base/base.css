@@ -130,6 +130,80 @@ html, body {
   margin: 2mm 0;
 }
 
+/* ---- Newspaper furniture (role-based; theme-agnostic) ------------------ */
+
+/* Kicker / eyebrow: small caps tag above the headline. */
+.story__kicker {
+  font-family: var(--headline-font), sans-serif;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin: 0 0 0.5mm;
+}
+
+/* Dateline run-in at the start of the body. */
+.story__dateline {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.92em;
+}
+
+/* Dominant story (Center of Visual Impact): bigger, breaks the column flow. */
+.story--dominant { column-span: all; break-inside: avoid; }
+.story--dominant .story__headline { font-size: 26pt; line-height: 1.02; }
+.story--dominant .story__deck { font-size: 12pt; }
+
+/* Feature: a notch above a standard article. */
+.story--role-feature .story__headline { font-size: 18pt; }
+
+/* Teaser / refer ("анонс"): compact promo pointing inside, boxed off by rules. */
+.story--teaser {
+  break-inside: avoid;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  padding: 1.5mm 0;
+}
+.story--teaser .story__headline { font-size: 12pt; line-height: 1.06; margin: 0 0 1mm; }
+.story__teaser {
+  font-size: 9pt;
+  line-height: 1.25;
+  margin: 0 0 1mm;
+  color: color-mix(in srgb, var(--ink) 85%, transparent);
+}
+.story__refer {
+  font-family: var(--headline-font), sans-serif;
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent);
+  margin: 0;
+}
+.story__refer-arrow { font-weight: 700; }
+
+/* Sidebar / fact box: boxed companion, screened back. */
+.story--role-sidebar,
+.story--role-factbox {
+  break-inside: avoid;
+  border: 1px solid var(--ink);
+  padding: 2mm 2.5mm;
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.story--role-sidebar .story__headline,
+.story--role-factbox .story__headline { font-size: 11pt; }
+.story--role-factbox .story__body { font-size: 8.5pt; }
+
+/* Briefs: tight items, hairline-separated, scannable. */
+.story--role-brief { break-inside: avoid; }
+.story--role-brief + .story--role-brief {
+  border-top: var(--rule-weight) solid color-mix(in srgb, var(--ink) 35%, transparent);
+  padding-top: 1.5mm;
+  margin-top: 1.5mm;
+}
+
 /* Widow/orphan control for print. */
 p { orphans: 2; widows: 2; }
 

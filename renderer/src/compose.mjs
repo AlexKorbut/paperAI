@@ -80,10 +80,33 @@ function webCss() {
 }`;
 }
 
+const SIZE_TO_ROLE = { lead: "feature", medium: "standard", brief: "brief" };
+
 function storyArticle(view, slot) {
   if (!view) return "";
-  const cls = `story story--${slot.size}`;
+  const role = slot.role || SIZE_TO_ROLE[slot.size] || "standard";
+  const dominant = slot.dominant ? " story--dominant" : "";
+  // Keep the legacy size class (themes style off it) + add role/furniture classes.
+  const cls = `story story--${slot.size} story--role-${role}${dominant}`;
   const span = `--span:${slot.columns}`;
+
+  const kicker = view.kicker
+    ? `<p class="story__kicker">${esc(view.kicker)}</p>`
+    : "";
+  const headline = `<h2 class="story__headline">${esc(view.headline)}</h2>`;
+
+  // A teaser ("анонс") is the same story rendered small: kicker + headline +
+  // one teaser line + a refer arrow, no body or photo.
+  if (role === "teaser" || slot.body_policy === "teaser_only") {
+    const tt = view.teaser_text || view.deck || "";
+    return `<article class="${cls} story--teaser" style="${span}">
+  ${kicker}
+  ${headline}
+  ${tt ? `<p class="story__teaser">${esc(tt)}</p>` : ""}
+  <p class="story__refer">${esc(view.byline || "Подробнее внутри")} <span class="story__refer-arrow">&#8594;</span></p>
+</article>`;
+  }
+
   const photo =
     slot.with_photo && view.image_ref
       ? `<figure class="story__photo"><img src="${esc(view.image_ref)}" alt=""/>${
@@ -95,14 +118,21 @@ function storyArticle(view, slot) {
   const quote = slot.pull_quote
     ? `<blockquote class="story__pull">${esc(slot.pull_quote)}</blockquote>`
     : "";
+  // Dateline runs in to the first paragraph: "MINSK — The story begins…".
+  let body = view.body_html || "";
+  if (view.dateline) {
+    const run = `<span class="story__dateline">${esc(view.dateline)}</span> `;
+    body = /^\s*<p[^>]*>/i.test(body) ? body.replace(/^(\s*<p[^>]*>)/i, `$1${run}`) : run + body;
+  }
   // body_html is trusted newspaper-register HTML produced by our own editorial stage.
   return `<article class="${cls}" style="${span}">
-  <h2 class="story__headline">${esc(view.headline)}</h2>
+  ${kicker}
+  ${headline}
   ${deck}
   ${byline}
   ${photo}
   ${quote}
-  <div class="story__body">${view.body_html || ""}</div>
+  <div class="story__body">${body}</div>
 </article>`;
 }
 

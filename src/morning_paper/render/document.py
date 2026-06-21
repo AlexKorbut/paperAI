@@ -38,6 +38,10 @@ def build_render_document(
             byline=story.byline,
             caption=story.source,  # attribution shown as caption/source line
             image_ref=story.image_ref if slot.with_photo else None,
+            kicker=story.kicker,
+            teaser_text=story.teaser_text,
+            dateline=story.dateline,
+            kind=story.kind,
         )
         if slot.with_photo and story.image_ref:
             images[story.image_ref] = story.image_ref
