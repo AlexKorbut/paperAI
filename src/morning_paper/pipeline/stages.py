@@ -321,6 +321,14 @@ def s7_render(ctx: IssueContext, **kwargs) -> IssueContext:
             )
         )
 
+    overrides = {}
+    try:
+        from .. import accounts
+
+        overrides = accounts.load(ctx.user_id).style_overrides or {}
+    except Exception:
+        overrides = {}
+
     doc = build_render_document(
         issue_id=ctx.issue_id,
         theme_id=ctx.theme_id,
@@ -329,6 +337,7 @@ def s7_render(ctx: IssueContext, **kwargs) -> IssueContext:
         stories=stories_model,
         grid_plan=ctx.grid_plan,
         issue_date=date.today(),
+        style_overrides=overrides,
     )
     ctx.render_document = doc
 

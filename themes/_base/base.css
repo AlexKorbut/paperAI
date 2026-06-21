@@ -1,6 +1,7 @@
-/* Structural base layer. Consumes var(--*) set per theme; contains NO literal
-   colors or font names of its own. Themes override the variables and may add a
-   few theme-specific selectors on top. */
+/* Structural base layer. Consumes var(--*) set per theme/user; contains NO literal
+   colors or font names of its own. Sizes are TOKENS with sensible defaults so a
+   theme — or a per-user tuning override — can re-scale type without touching this
+   file. The single most important knob is --scale (reading size). */
 
 * { box-sizing: border-box; }
 
@@ -10,10 +11,16 @@ html, body {
   background: var(--paper);
   color: var(--ink);
   font-family: var(--body-font), Georgia, "Times New Roman", serif;
-  font-size: 10.5pt;
-  line-height: 1.32;
+  font-size: var(--body-size, 10.5pt);
+  line-height: var(--leading, 1.45);
   hyphens: auto;
+  -webkit-hyphens: auto;
 }
+
+/* Reading-size knob: zoom the whole reading surface uniformly (the masthead is a
+   sibling and stays fixed as the brand). Works across every theme regardless of
+   how it sets its own type sizes. */
+main.paper { zoom: var(--scale, 1); }
 
 /* ---- Masthead ---------------------------------------------------------- */
 .masthead {
@@ -25,7 +32,7 @@ html, body {
 .masthead__title,
 .masthead__logo {
   font-family: var(--masthead-font), var(--headline-font), serif;
-  font-size: 48pt;
+  font-size: var(--fs-masthead, 48pt);
   line-height: 1;
   margin: 0;
   letter-spacing: 0.5px;
@@ -36,7 +43,7 @@ html, body {
   justify-content: center;
   gap: 18px;
   margin-top: 2mm;
-  font-size: 8pt;
+  font-size: var(--fs-meta, 8pt);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -47,9 +54,9 @@ html, body {
   padding-bottom: 4mm;
   margin-bottom: 4mm;
 }
-.lead .story__headline { font-size: 30pt; line-height: 1.04; }
+.lead .story__headline { font-size: var(--fs-lead, 30pt); line-height: 1.05; }
 .lead .story__body {
-  column-count: 3;
+  column-count: var(--lead-cols, 3);
   column-gap: var(--gutter);
   column-rule: var(--rule-weight) solid color-mix(in srgb, var(--ink) 35%, transparent);
 }
@@ -58,12 +65,13 @@ html, body {
 .section { margin-bottom: 5mm; }
 .section__title {
   font-family: var(--headline-font), serif;
-  font-size: 11pt;
+  font-size: var(--fs-section, 11pt);
   text-transform: uppercase;
   letter-spacing: 2px;
   border-bottom: var(--rule-weight) solid var(--ink);
   padding-bottom: 1mm;
   margin: 0 0 3mm;
+  string-set: section content();   /* feeds the @page running head */
 }
 .section__grid {
   column-count: var(--columns);
@@ -76,53 +84,53 @@ html, body {
   break-inside: avoid-column;
   margin: 0 0 4mm;
 }
-/* Lead spans the whole width; flowed stories fill the section's multicol.
-   Honoring an exact per-story column span (GridSlot.columns) needs a CSS-grid
-   layer instead of multicol — a planned layout refinement, see docs/04. */
+/* Lead spans the whole width; flowed stories fill the section's multicol. */
 .story--lead { column-span: all; }
 .story__headline {
   font-family: var(--headline-font), serif;
   font-weight: 700;
-  font-size: 15pt;
-  line-height: 1.08;
+  font-size: var(--fs-headline, 15pt);
+  line-height: 1.1;
   margin: 0 0 1mm;
 }
-.story--brief .story__headline { font-size: 12pt; }
+.story--brief .story__headline { font-size: var(--fs-brief, 12pt); }
 .story__deck {
   font-style: italic;
-  font-size: 10pt;
+  font-size: var(--fs-deck, 10.5pt);
+  line-height: 1.3;
   margin: 0 0 2mm;
   color: color-mix(in srgb, var(--ink) 80%, transparent);
 }
 .story__byline {
-  font-size: 7.5pt;
+  font-size: var(--fs-byline, 7.5pt);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin: 0 0 2mm;
 }
-.story__body p { margin: 0 0 2mm; text-align: justify; }
+.story__body p { margin: 0 0 var(--para-space, 2mm); text-align: justify; }
 .story__body p:first-of-type::first-letter {
-  /* Drop cap on the opening paragraph — only meaningful on larger stories. */
+  /* Drop cap on the opening paragraph; tunable/disable-able via tokens. */
   font-family: var(--headline-font), serif;
-  float: left;
-  font-size: 3.2em;
+  float: var(--dropcap-float, left);
+  font-size: var(--dropcap-size, 3.2em);
   line-height: 0.8;
   padding-right: 3px;
 }
-.story--brief .story__body p:first-of-type::first-letter { font-size: 1em; float: none; }
+.story--brief .story__body p:first-of-type::first-letter,
+.story--teaser .story__body p:first-of-type::first-letter { font-size: 1em; float: none; padding: 0; }
 
 .story__photo { margin: 0 0 2mm; break-inside: avoid; }
 .story__photo img { width: 100%; height: auto; display: block; }
 .story__photo figcaption {
-  font-size: 7pt;
+  font-size: var(--fs-caption, 7pt);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-top: 1mm;
 }
 .story__pull {
   font-family: var(--headline-font), serif;
-  font-size: 14pt;
-  line-height: 1.2;
+  font-size: var(--fs-pull, 14pt);
+  line-height: 1.25;
   font-style: italic;
   border-top: 2px solid var(--ink);
   border-bottom: 2px solid var(--ink);
@@ -135,7 +143,7 @@ html, body {
 /* Kicker / eyebrow: small caps tag above the headline. */
 .story__kicker {
   font-family: var(--headline-font), sans-serif;
-  font-size: 7.5pt;
+  font-size: var(--fs-kicker, 7.5pt);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1.5px;
@@ -153,11 +161,11 @@ html, body {
 
 /* Dominant story (Center of Visual Impact): bigger, breaks the column flow. */
 .story--dominant { column-span: all; break-inside: avoid; }
-.story--dominant .story__headline { font-size: 26pt; line-height: 1.02; }
-.story--dominant .story__deck { font-size: 12pt; }
+.story--dominant .story__headline { font-size: var(--fs-dominant, 26pt); line-height: 1.04; }
+.story--dominant .story__deck { font-size: var(--fs-deck-lead, 12pt); }
 
 /* Feature: a notch above a standard article. */
-.story--role-feature .story__headline { font-size: 18pt; }
+.story--role-feature .story__headline { font-size: var(--fs-feature, 18pt); }
 
 /* Teaser / refer ("анонс"): compact promo pointing inside, boxed off by rules. */
 .story--teaser {
@@ -166,16 +174,16 @@ html, body {
   border-bottom: 1px solid color-mix(in srgb, var(--ink) 40%, transparent);
   padding: 1.5mm 0;
 }
-.story--teaser .story__headline { font-size: 12pt; line-height: 1.06; margin: 0 0 1mm; }
+.story--teaser .story__headline { font-size: var(--fs-brief, 12pt); line-height: 1.08; margin: 0 0 1mm; }
 .story__teaser {
-  font-size: 9pt;
-  line-height: 1.25;
+  font-size: var(--fs-teaser, 9.5pt);
+  line-height: 1.3;
   margin: 0 0 1mm;
   color: color-mix(in srgb, var(--ink) 85%, transparent);
 }
 .story__refer {
   font-family: var(--headline-font), sans-serif;
-  font-size: 7.5pt;
+  font-size: var(--fs-kicker, 7.5pt);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -193,8 +201,8 @@ html, body {
   background: color-mix(in srgb, var(--ink) 5%, transparent);
 }
 .story--role-sidebar .story__headline,
-.story--role-factbox .story__headline { font-size: 11pt; }
-.story--role-factbox .story__body { font-size: 8.5pt; }
+.story--role-factbox .story__headline { font-size: var(--fs-sidebar, 11pt); }
+.story--role-factbox .story__body { font-size: 0.92em; }
 
 /* Briefs: tight items, hairline-separated, scannable. */
 .story--role-brief { break-inside: avoid; }
@@ -207,9 +215,17 @@ html, body {
 /* Widow/orphan control for print. */
 p { orphans: 2; widows: 2; }
 
-/* Running footer with page numbers via Paged.js. */
+/* Running heads + page numbers via Paged.js. */
 @page {
   margin: 14mm 12mm 16mm;
+  @top-center {
+    content: string(section);
+    font-family: var(--headline-font), serif;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: color-mix(in srgb, var(--ink) 70%, transparent);
+  }
   @bottom-center {
     content: counter(page);
     font-family: var(--body-font), serif;

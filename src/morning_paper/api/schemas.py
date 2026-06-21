@@ -44,6 +44,18 @@ class UserUpdate(BaseModel):
     deliver_channel: str | None = None
 
 
+class StyleOverrides(BaseModel):
+    """Per-user reading-comfort tuning applied on top of the chosen theme."""
+
+    scale: float | None = None          # reading-size multiplier (e.g. 0.9–1.3)
+    leading: float | None = None        # body line-height
+    accent: str | None = None           # accent colour (hex)
+    body_size: str | None = None        # e.g. "10.5pt"
+    body_font: str | None = None
+    headline_font: str | None = None
+    dropcap: bool | None = None
+
+
 # --------------------------------------------------------------------------- #
 # Sources
 # --------------------------------------------------------------------------- #

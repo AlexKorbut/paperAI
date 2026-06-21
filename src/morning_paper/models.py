@@ -347,3 +347,6 @@ class RenderDocument(BaseModel):
     grid_plan: GridPlan
     stories: dict[str, StoryView]
     images: dict[str, str] = Field(default_factory=dict)  # image_ref -> object key/path
+    # Per-user reading-comfort overrides (scale, leading, accent, fonts, dropcap)
+    # applied on top of the theme by the renderer.
+    style_overrides: dict = Field(default_factory=dict)

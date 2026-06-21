@@ -10,6 +10,7 @@ const LINKS: [string, string][] = [
   ["/settings", "Настройки"],
   ["/sources", "Источники"],
   ["/themes", "Стили"],
+  ["/typography", "Типографика"],
   ["/profile", "Профиль"],
   ["/issues", "Выпуски"],
   ["/print", "Печать"],

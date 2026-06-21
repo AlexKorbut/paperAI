@@ -10,6 +10,7 @@ export default function ThemesPage() {
   const [current, setCurrent] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string>("");
+  const [preview, setPreview] = useState<string>("");  // theme id whose preview is open
   const [ok, setOk] = useState("");
   const [err, setErr] = useState("");
 
@@ -64,14 +65,25 @@ export default function ThemesPage() {
               <span className="swatch" style={{ background: t.colors.accent }} title="accent" />
             </div>
             <div className="kv"><span className="k">формат</span><span>{t.page} · {t.columns} колонок · {t.color_mode}</span></div>
-            <button
-              className="btn small secondary"
-              style={{ marginTop: 12 }}
-              disabled={busy === t.id || t.id === current}
-              onClick={() => choose(t.id)}
-            >
-              {t.id === current ? "выбран" : busy === t.id ? "…" : "Использовать"}
-            </button>
+            {preview === t.id ? (
+              <iframe
+                src={`/api/v1/themes/${encodeURIComponent(t.id)}/preview`}
+                title={`${t.id} preview`}
+                style={{ width: "100%", height: 300, border: "1px solid var(--line)", borderRadius: 6, marginTop: 10, background: "#fff" }}
+              />
+            ) : null}
+            <div className="row" style={{ marginTop: 12 }}>
+              <button
+                className="btn small secondary"
+                disabled={busy === t.id || t.id === current}
+                onClick={() => choose(t.id)}
+              >
+                {t.id === current ? "выбран" : busy === t.id ? "…" : "Использовать"}
+              </button>
+              <button className="btn small secondary" onClick={() => setPreview(preview === t.id ? "" : t.id)}>
+                {preview === t.id ? "Скрыть" : "Превью"}
+              </button>
+            </div>
           </div>
         ))}
       </div>

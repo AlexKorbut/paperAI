@@ -22,6 +22,7 @@ def build_render_document(
     issue_no: str | None = None,
     edition: str | None = None,
     issue_date: date | None = None,
+    style_overrides: dict | None = None,
 ) -> RenderDocument:
     by_id = {s.id: s for s in stories}
     views: dict[str, StoryView] = {}
@@ -60,4 +61,5 @@ def build_render_document(
         grid_plan=grid_plan,
         stories=views,
         images=images,
+        style_overrides=style_overrides or {},
     )

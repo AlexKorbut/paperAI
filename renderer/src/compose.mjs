@@ -38,10 +38,52 @@ function cssVarsBlock(manifest) {
     "--rule-weight": g.rule_weight || "1px",
     "--gutter": g.gutter || "10px",
   };
+  // Optional per-theme type tokens (override base.css readability defaults).
+  const typeTokens = {
+    "--scale": t.scale_factor,
+    "--leading": t.leading,
+    "--body-size": t.body_pt,
+    "--fs-masthead": t.masthead_pt,
+    "--fs-lead": t.lead_pt,
+    "--fs-headline": t.headline_pt,
+    "--fs-dominant": t.dominant_pt,
+    "--fs-feature": t.feature_pt,
+  };
+  for (const [k, v] of Object.entries(typeTokens)) {
+    if (v !== undefined && v !== null && v !== "") vars[k] = String(v);
+  }
   const body = Object.entries(vars)
     .map(([k, v]) => `  ${k}: ${v};`)
     .join("\n");
-  return `:root[data-theme="${manifest.id}"] {\n${body}\n}`;
+  // One theme per document, so plain :root (data-theme lives on <body>, which a
+  // :root[data-theme] selector would NOT match — that was a latent no-op).
+  return `:root {\n${body}\n}`;
+}
+
+// Per-user reading-comfort overrides — emitted AFTER theme CSS so the user wins.
+const _OVERRIDE_VARS = {
+  scale: "--scale",
+  leading: "--leading",
+  accent: "--accent",
+  body_size: "--body-size",
+  body_font: "--body-font",
+  headline_font: "--headline-font",
+  masthead_font: "--masthead-font",
+};
+
+function userVarsBlock(manifest, overrides) {
+  if (!overrides || typeof overrides !== "object") return "";
+  const lines = [];
+  for (const [key, cssVar] of Object.entries(_OVERRIDE_VARS)) {
+    const v = overrides[key];
+    if (v === undefined || v === null || v === "") continue;
+    lines.push(`  ${cssVar}: ${key.endsWith("_font") ? `"${v}"` : v};`);
+  }
+  if (overrides.dropcap === false) {
+    lines.push("  --dropcap-size: 1em;", "  --dropcap-float: none;");
+  }
+  if (!lines.length) return "";
+  return `:root {\n${lines.join("\n")}\n}`;
 }
 
 function pageRule(manifest) {
@@ -224,6 +266,7 @@ ${cssVarsBlock(manifest)}
 ${baseCss}
 ${themeCss}
 ${web ? webCss() : ""}
+${userVarsBlock(manifest, doc.style_overrides)}
 </style>
 </head>
 <body data-theme="${esc(doc.theme_id)}">
