@@ -508,6 +508,239 @@ def delete_data(
 
 
 # --------------------------------------------------------------------------- #
+# Print on demand (Phase 3)
+# --------------------------------------------------------------------------- #
+@app.command("print-providers")
+def print_providers() -> None:
+    """List print-on-demand providers and the formats they support."""
+    from . import print as printmod
+
+    for p in printmod.available_providers():
+        typer.echo(
+            f"{p['provider_id']:16} {p['display_name']:16} "
+            f"min ${p['min_total_usd']:>5.2f}  formats: {', '.join(p['supported_formats'])}"
+        )
+
+
+@app.command("print-quote")
+def print_quote(
+    provider: str = typer.Option("newspaper_club", "--provider"),
+    fmt: str = typer.Option("tabloid", "--format"),
+    pages: int = typer.Option(8, "--pages"),
+    copies: int = typer.Option(1, "--copies"),
+    country: str = typer.Option("US", "--country"),
+) -> None:
+    """Estimate the price of printing an issue."""
+    from . import print as printmod
+
+    try:
+        q = printmod.quote(provider, format=fmt, pages=pages, copies=copies, country=country)
+    except (KeyError, ValueError) as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.echo(
+        f"{q.provider} {q.format}: {q.copies}×{q.pages}p — "
+        f"unit ${q.unit_price_usd:.2f} + ship ${q.shipping_usd:.2f} = "
+        f"${q.total_usd:.2f} ({'estimate' if q.estimate else 'quoted'})"
+    )
+
+
+@app.command("print-order")
+def print_order(
+    user: str = typer.Option("me", help="user id"),
+    provider: str = typer.Option("newspaper_club", "--provider"),
+    fmt: str = typer.Option("tabloid", "--format"),
+    copies: int = typer.Option(1, "--copies"),
+    issue: str = typer.Option("", "--issue", help="issue id (resolves the stored PDF)"),
+    pdf: Path = typer.Option(None, "--pdf", help="explicit PDF path"),
+    pages: int = typer.Option(0, "--pages", help="override page count"),
+    to_name: str = typer.Option(..., "--to-name"),
+    to_line1: str = typer.Option(..., "--to-line1"),
+    to_city: str = typer.Option("", "--to-city"),
+    to_postcode: str = typer.Option("", "--to-postcode"),
+    to_country: str = typer.Option("US", "--to-country"),
+) -> None:
+    """Create (and submit, if a provider key is set) a print order for an issue."""
+    from . import print as printmod
+    from .models import PrintAddress
+
+    pdf_path = str(pdf) if pdf else None
+    if pdf_path is None and issue:
+        try:
+            from .store import get_object_store
+
+            pdf_path = get_object_store().open_path(f"issues/{issue}/issue.pdf")
+        except Exception:
+            pdf_path = None
+
+    addr = PrintAddress(name=to_name, line1=to_line1, city=to_city, postcode=to_postcode, country=to_country)
+    try:
+        order = printmod.create_order(
+            user, provider_id=provider, format=fmt, copies=copies, address=addr,
+            issue_id=issue or None, pages=(pages or None), pdf_path=pdf_path,
+        )
+    except (KeyError, ValueError) as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.secho(
+        f"order {order.id}: {order.status} — ${order.quote.total_usd:.2f}"
+        + (f" (ref {order.provider_order_id})" if order.provider_order_id else ""),
+        fg=typer.colors.GREEN,
+    )
+    if order.status == "needs_credentials":
+        typer.echo(f"  set {provider.upper()}_API_KEY to actually place the order")
+
+
+@app.command("print-orders")
+def print_orders(user: str = typer.Option("me", help="user id")) -> None:
+    """List a user's print orders."""
+    from . import print as printmod
+
+    orders = printmod.list_orders(user)
+    if not orders:
+        typer.echo("no print orders")
+        return
+    for o in orders:
+        typer.echo(f"{o.created_at.isoformat()}  {o.id}  {o.provider} {o.format} ×{o.copies}  {o.status}  ${o.quote.total_usd:.2f}")
+
+
+# --------------------------------------------------------------------------- #
+# Family / team groups (Phase 3)
+# --------------------------------------------------------------------------- #
+@app.command("group-create")
+def group_create(
+    name: str = typer.Option(..., "--name"),
+    owner: str = typer.Option("me", "--owner"),
+    member: list[str] = typer.Option([], "--member", help="member user id (repeatable)"),
+    theme: str = typer.Option("", "--theme"),
+    lang: str = typer.Option("", "--lang"),
+) -> None:
+    """Create a shared group (one paper for several people)."""
+    from . import groups
+
+    g = groups.create(name, owner, members=list(member), theme=theme or None, output_lang=lang or None)
+    typer.secho(f"group {g.id} «{g.name}» members: {', '.join(g.members)}", fg=typer.colors.GREEN)
+
+
+@app.command("group-add")
+def group_add(group: str = typer.Option(..., "--group"), user: str = typer.Option(..., "--user")) -> None:
+    """Add a member to a group."""
+    from . import groups
+
+    g = groups.add_member(group, user)
+    typer.echo(f"members: {', '.join(g.members)}")
+
+
+@app.command("group-remove")
+def group_remove(group: str = typer.Option(..., "--group"), user: str = typer.Option(..., "--user")) -> None:
+    """Remove a member from a group."""
+    from . import groups
+
+    try:
+        g = groups.remove_member(group, user)
+    except ValueError as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.echo(f"members: {', '.join(g.members)}")
+
+
+@app.command("group-list")
+def group_list(owner: str = typer.Option("", "--owner")) -> None:
+    """List groups (optionally filtered by owner)."""
+    from . import groups
+
+    gs = groups.list_groups(owner or None)
+    if not gs:
+        typer.echo("no groups")
+        return
+    for g in gs:
+        typer.echo(f"{g.id}  «{g.name}»  owner={g.owner}  members={len(g.members)}  theme={g.theme or '-'}")
+
+
+@app.command("run-group-issue")
+def run_group_issue_cmd(
+    group: str = typer.Option(..., "--group"),
+    theme: str = typer.Option("", "--theme"),
+    lang: str = typer.Option("", "--lang"),
+    out: Path = typer.Option(Path(".data"), "--out"),
+) -> None:
+    """Build one shared issue for a group and deliver it to every member."""
+    from . import groups
+
+    try:
+        res = groups.run_group_issue(group, theme_id=theme or None, output_lang=lang or None, out_dir=out)
+    except KeyError as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.secho(f"group issue {res['issue_id']} -> {res['pdf_path'] or 'n/a'}", fg=typer.colors.GREEN)
+    for d in res["deliveries"]:
+        mark = "✓" if d["ok"] else "✗"
+        typer.echo(f"  {mark} {d['user_id']} via {d['channel']}")
+
+
+# --------------------------------------------------------------------------- #
+# Theme marketplace (Phase 3)
+# --------------------------------------------------------------------------- #
+@app.command("themes-marketplace")
+def themes_marketplace() -> None:
+    """List installed themes with marketplace metadata (author/price)."""
+    from . import marketplace
+
+    for t in marketplace.listing():
+        tag = "builtin" if t["builtin"] else (f"by {t['author']}" if t["author"] else "installed")
+        price = f"${t['price_usd']:.2f}" if t["price_usd"] else "free"
+        typer.echo(f"{t['id']:16} {price:>7}  {tag:18} {t['display_name']}")
+
+
+@app.command("install-theme")
+def install_theme(
+    path: Path = typer.Option(..., "--path", help="theme bundle dir or .zip"),
+    overwrite: bool = typer.Option(False, "--overwrite"),
+) -> None:
+    """Install a third-party theme bundle into themes/."""
+    from . import marketplace
+
+    try:
+        if str(path).endswith(".zip"):
+            tid = marketplace.install_zip(path, overwrite=overwrite)
+        else:
+            tid = marketplace.install_theme(path, overwrite=overwrite)
+    except ValueError as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.secho(f"installed theme {tid!r}. Run `fetch-fonts --theme {tid}` if it needs fonts.", fg=typer.colors.GREEN)
+
+
+@app.command("uninstall-theme")
+def uninstall_theme(theme: str = typer.Option(..., "--theme")) -> None:
+    """Remove an installed (non-builtin) theme."""
+    from . import marketplace
+
+    try:
+        removed = marketplace.uninstall_theme(theme)
+    except ValueError as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.secho("removed" if removed else "not installed", fg=typer.colors.GREEN if removed else typer.colors.YELLOW)
+
+
+@app.command("package-theme")
+def package_theme(
+    theme: str = typer.Option(..., "--theme"),
+    out: Path = typer.Option(..., "--out", help="output .zip path"),
+) -> None:
+    """Package an installed theme into a shareable zip."""
+    from . import marketplace
+
+    try:
+        zp = marketplace.package_theme(theme, out)
+    except ValueError as e:
+        typer.secho(str(e), fg=typer.colors.RED, err=True)
+        raise typer.Exit(code=2)
+    typer.secho(f"wrote {zp}", fg=typer.colors.GREEN)
+
+
+# --------------------------------------------------------------------------- #
 # Economics / cost accounting
 # --------------------------------------------------------------------------- #
 @app.command("estimate")

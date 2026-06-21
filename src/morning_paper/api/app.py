@@ -13,7 +13,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .routers import issues, profile, render, sources, themes, users
+from .routers import groups, issues, marketplace, print, profile, render, sources, themes, users
 
 # Browser origins allowed to call the API (the Next.js cabinet in dev). Override
 # with MP_CORS_ORIGINS="https://app.example.com" (comma-separated) in production.
@@ -54,6 +54,9 @@ def create_app() -> FastAPI:
     app.include_router(themes.router, prefix="/v1")
     app.include_router(issues.router, prefix="/v1")
     app.include_router(render.router, prefix="/v1")
+    app.include_router(print.router, prefix="/v1")
+    app.include_router(groups.router, prefix="/v1")
+    app.include_router(marketplace.router, prefix="/v1")
 
     @app.exception_handler(KeyError)
     async def _key_error(_request: Request, exc: KeyError) -> JSONResponse:

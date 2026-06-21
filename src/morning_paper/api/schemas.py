@@ -108,6 +108,8 @@ class ThemeOut(BaseModel):
     columns: int
     color_mode: str
     colors: dict
+    author: str = ""
+    price_usd: float = 0.0
 
 
 # --------------------------------------------------------------------------- #
@@ -165,3 +167,56 @@ class RenderResponse(BaseModel):
     pdf_url: str
     page_count: int | None = None
     warnings: list[str] = Field(default_factory=list)
+
+
+# --------------------------------------------------------------------------- #
+# Print on demand (Phase 3)
+# --------------------------------------------------------------------------- #
+from ..models import PrintAddress  # noqa: E402  (re-exported for request bodies)
+
+
+class PrintQuoteRequest(BaseModel):
+    provider: str
+    format: str
+    pages: int = 8
+    copies: int = 1
+    country: str = "US"
+
+
+class PrintOrderRequest(BaseModel):
+    provider: str
+    format: str
+    copies: int = 1
+    issue_id: str | None = None
+    pages: int | None = None
+    address: PrintAddress
+
+
+# --------------------------------------------------------------------------- #
+# Groups (Phase 3)
+# --------------------------------------------------------------------------- #
+class GroupCreate(BaseModel):
+    name: str
+    owner: str | None = None  # defaults to the calling principal
+    members: list[str] = Field(default_factory=list)
+    theme: str | None = None
+    output_lang: str | None = None
+
+
+class MemberIn(BaseModel):
+    user_id: str
+
+
+# --------------------------------------------------------------------------- #
+# Marketplace (Phase 3)
+# --------------------------------------------------------------------------- #
+class MarketplaceTheme(BaseModel):
+    id: str
+    display_name: str
+    mood: str = ""
+    author: str = ""
+    price_usd: float = 0.0
+    homepage: str = ""
+    license: str = ""
+    builtin: bool = True
+    third_party: bool = False

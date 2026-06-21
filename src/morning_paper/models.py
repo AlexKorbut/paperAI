@@ -155,6 +155,79 @@ class Feedback(BaseModel):
 
 
 # --------------------------------------------------------------------------- #
+# Print-on-demand (Phase 3)
+# --------------------------------------------------------------------------- #
+class PrintAddress(BaseModel):
+    name: str
+    line1: str
+    line2: str = ""
+    city: str = ""
+    postcode: str = ""
+    country: str = "US"  # ISO-3166 alpha-2; drives shipping estimate
+
+
+class PrintQuote(BaseModel):
+    provider: str
+    format: str
+    pages: int
+    copies: int
+    unit_price_usd: float
+    shipping_usd: float
+    total_usd: float
+    currency: str = "USD"
+    estimate: bool = True  # heuristic until a real provider account is wired
+
+
+class PrintOrder(BaseModel):
+    id: str
+    user_id: str
+    provider: str
+    format: str
+    pages: int
+    copies: int
+    address: PrintAddress
+    quote: PrintQuote
+    issue_id: str | None = None
+    # draft | quoted | submitted | needs_credentials | failed
+    status: str = "draft"
+    provider_order_id: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @classmethod
+    def make(cls, *, user_id: str, provider: str, quote: "PrintQuote",
+             address: "PrintAddress", copies: int, issue_id: str | None = None, **kw) -> "PrintOrder":
+        ts = datetime.now(timezone.utc)
+        oid = hashlib.sha256(
+            f"{user_id}:{provider}:{issue_id}:{ts.timestamp()}".encode()
+        ).hexdigest()[:20]
+        return cls(
+            id=oid, user_id=user_id, provider=provider, format=quote.format,
+            pages=quote.pages, copies=copies, address=address, quote=quote,
+            issue_id=issue_id, created_at=ts, **kw,
+        )
+
+
+# --------------------------------------------------------------------------- #
+# Family / team groups (Phase 3): one shared paper for several people
+# --------------------------------------------------------------------------- #
+class Group(BaseModel):
+    id: str
+    name: str
+    owner: str
+    members: list[str] = Field(default_factory=list)
+    theme: str | None = None
+    output_lang: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @classmethod
+    def make(cls, *, name: str, owner: str, members: list[str] | None = None,
+             theme: str | None = None, output_lang: str | None = None) -> "Group":
+        gid = hashlib.sha256(f"{owner}:{name}".encode()).hexdigest()[:16]
+        mem = list(dict.fromkeys([owner, *(members or [])]))  # owner always a member, de-duped
+        return cls(id=gid, name=name, owner=owner, members=mem, theme=theme, output_lang=output_lang)
+
+
+# --------------------------------------------------------------------------- #
 # Candidates and stories (retrieval -> editorial)
 # --------------------------------------------------------------------------- #
 class Candidate(BaseModel):

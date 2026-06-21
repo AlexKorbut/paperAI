@@ -5,10 +5,16 @@
 import type {
   FeedbackIn,
   FeedbackOut,
+  Group,
   IssueCreate,
   IssueStatus,
   IssueSummary,
   Job,
+  MarketplaceTheme,
+  PrintAddress,
+  PrintOrder,
+  PrintProvider,
+  PrintQuote,
   Profile,
   SourceAccount,
   SourceInfo,
@@ -106,4 +112,28 @@ export const api = {
   exportData: (id: string) => request<Record<string, unknown>>(`/v1/users/${enc(id)}/data:export`),
   deleteData: (id: string) =>
     request<Record<string, unknown>>(`/v1/users/${enc(id)}/data`, { method: "DELETE" }),
+
+  // Print on demand
+  printProviders: () => request<PrintProvider[]>(`/v1/print/providers`),
+  printQuote: (body: { provider: string; format: string; pages: number; copies: number; country: string }) =>
+    request<PrintQuote>(`/v1/print/quote`, { method: "POST", body: JSON.stringify(body) }),
+  createPrintOrder: (
+    id: string,
+    body: { provider: string; format: string; copies: number; issue_id?: string | null; pages?: number | null; address: PrintAddress },
+  ) => request<PrintOrder>(`/v1/users/${enc(id)}/print-orders`, { method: "POST", body: JSON.stringify(body) }),
+  listPrintOrders: (id: string) => request<PrintOrder[]>(`/v1/users/${enc(id)}/print-orders`),
+
+  // Groups
+  createGroup: (body: { name: string; members: string[]; theme?: string | null; output_lang?: string | null }) =>
+    request<Group>(`/v1/groups`, { method: "POST", body: JSON.stringify(body) }),
+  listGroups: () => request<Group[]>(`/v1/groups`),
+  addGroupMember: (gid: string, user_id: string) =>
+    request<Group>(`/v1/groups/${enc(gid)}/members`, { method: "POST", body: JSON.stringify({ user_id }) }),
+  removeGroupMember: (gid: string, uid: string) =>
+    request<Group>(`/v1/groups/${enc(gid)}/members/${enc(uid)}`, { method: "DELETE" }),
+  deleteGroup: (gid: string) => request<{ deleted: boolean }>(`/v1/groups/${enc(gid)}`, { method: "DELETE" }),
+  createGroupIssue: (gid: string) => request<Job>(`/v1/groups/${enc(gid)}/issues`, { method: "POST" }),
+
+  // Marketplace
+  marketplace: () => request<MarketplaceTheme[]>(`/v1/marketplace/themes`),
 };

@@ -73,6 +73,8 @@ class Secrets(BaseSettings):
     newsapi_key: str | None = None
     telegram_bot_token: str | None = None
     resend_api_key: str | None = None
+    newspaper_club_api_key: str | None = None  # print-on-demand (Phase 3)
+    mixam_api_key: str | None = None
 
 
 class Settings(BaseModel):
