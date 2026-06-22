@@ -61,6 +61,30 @@ main.paper { zoom: var(--scale, 1); }
   column-rule: var(--rule-weight) solid color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
+/* ---- Front-page modular mosaic (CSS Grid; one page, Paged.js-safe) ------ */
+main.paper > .front {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), 1fr);
+  column-gap: var(--gutter);
+  align-items: start;
+  break-after: page;
+}
+main.paper > .front > .story {
+  grid-column: span var(--span, 2);
+  grid-row: span var(--row-span, 1);
+  break-inside: avoid;
+  margin: 0 0 4mm;
+}
+main.paper > .front > .story--dominant { grid-column: 1 / -1; }
+/* Each module's body flows in its own balanced columns (macro = grid, micro = multicol). */
+main.paper > .front > .story .story__body {
+  column-count: var(--story-cols, 1);
+  column-gap: var(--gutter);
+  column-rule: var(--rule-weight) solid color-mix(in srgb, var(--ink) 30%, transparent);
+}
+/* Optional full-width band (e.g. a section flag inside the mosaic). */
+.front-band { grid-column: 1 / -1; }
+
 /* ---- Sections ---------------------------------------------------------- */
 .section { margin-bottom: 5mm; }
 .section__title {

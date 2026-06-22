@@ -287,10 +287,25 @@ class GridSlot(BaseModel):
     role: SlotRole | None = None        # explicit editorial role; falls back to size mapping
     dominant: bool = False              # the section's Center of Visual Impact (one per section)
     body_policy: BodyPolicy = "full"    # full article vs truncated vs teaser-only ("анонс")
+    # ---- Phase: modular front-page mosaic ----
+    row_span: int = Field(default=1, ge=1)   # vertical grid span (taller features)
+    front: bool = True                       # part of the page-1 mosaic vs the flow continuation
+    story_cols: int | None = None            # text columns INSIDE the module (else derived from columns)
 
     @property
     def effective_role(self) -> str:
         return self.role or _SIZE_TO_ROLE.get(self.size, "standard")
+
+    @property
+    def effective_story_cols(self) -> int:
+        """Text columns inside the module: explicit, else ~half the column span."""
+        if self.story_cols is not None:
+            return max(1, self.story_cols)
+        if self.dominant:
+            return max(1, min(4, self.columns // 2))
+        if self.effective_role in ("brief", "teaser", "sidebar", "factbox"):
+            return 1
+        return max(1, min(3, self.columns // 2))
 
 
 class GridPlan(BaseModel):

@@ -28,6 +28,8 @@ GRID_SCHEMA = {
                     },
                     "dominant": {"type": "boolean"},
                     "body_policy": {"type": "string", "enum": ["full", "truncate", "teaser_only"]},
+                    "row_span": {"type": "integer", "minimum": 1, "maximum": 4},
+                    "front": {"type": "boolean"},
                     "columns": {"type": "integer", "minimum": 1, "maximum": 6},
                     "with_photo": {"type": "boolean"},
                     "pull_quote": {"type": ["string", "null"]},
@@ -57,19 +59,19 @@ def plan_grid(
         f"- id={s.id} headline={s.headline!r}" for s in stories
     )
     system = (
-        "You are a newspaper editor planning a front page with real hierarchy. "
-        "Pick ONE dominant lead story (size=lead, role=feature, dominant=true) as the "
-        "Center of Visual Impact. Give the next 1-2 stories role=feature; make a few "
-        "role=standard; cluster the shortest as role=brief; mark 1-2 short items as "
-        "role=teaser with body_policy=teaser_only (an 'анонс' pointing inside). Use "
-        "role=sidebar for a boxed companion when relevant. Exactly one slot may be dominant. "
-        f"Respect the theme constraints: {theme.grid.columns} columns, "
-        f"max {theme.grid.max_lead} lead stories."
+        "You are a newspaper editor laying out a modular FRONT-PAGE MOSAIC. "
+        "Pick ONE dominant lead (size=lead, role=feature, dominant=true, columns=all, front=true) "
+        "as the Center of Visual Impact. Then TILE the page: stories' `columns` spans in each row "
+        f"should sum to the page width ({theme.grid.columns} columns) — e.g. two half-width features, "
+        "or a standard + a boxed sidebar, or a row of briefs/teasers. Mark short promos as role=teaser, "
+        "body_policy=teaser_only ('анонс'). Set front=true for the ~6-8 stories that fill page one and "
+        "front=false for the rest (they flow on later pages). Exactly one slot is dominant. "
+        f"Respect: {theme.grid.columns} columns, max {theme.grid.max_lead} lead."
     )
     user_msg = (
-        f"Plan a grid layout for these {len(stories)} stories:\n{story_list}\n\n"
-        "For each story assign: section, size (lead/medium/brief), role, dominant, "
-        "body_policy, column span, and whether to show a photo."
+        f"Plan a front-page mosaic for these {len(stories)} stories:\n{story_list}\n\n"
+        "For each: section, size, role, dominant, body_policy, columns (span), front, "
+        "and whether to show a photo. Make per-row column spans sum to the page width."
     )
 
     try:
@@ -95,33 +97,44 @@ def plan_grid(
 
 
 def _fallback_grid(stories: list[SummarizedStory], *, theme: ThemeManifest) -> GridPlan:
-    """Deterministic newspaper hierarchy when no LLM plans the page:
-    one dominant lead feature, a couple of features, standards, a briefs cluster,
-    and 1-2 teasers ("анонсы") at the tail."""
-    cols = theme.grid.columns
-    mid = max(2, min(cols, 3))
-    small = max(2, min(cols, 6) // 2)
+    """Deterministic modular front-page mosaic + flow continuation when no LLM
+    plans the page: a dominant lead feature (full bleed), rows of features and a
+    standard+sidebar, a briefs/teasers row — tiled to fill page one — then the
+    remaining stories flow on later pages."""
+    cols = min(theme.grid.columns, 6)
+    hi = (cols + 1) // 2          # ceil half
+    lo = max(2, cols // 2)        # floor half (>=2)
+    sm = 2
     n = len(stories)
+    FRONT_MAX = 7                 # keep the mosaic to one page; rest is flow
     slots: list[GridSlot] = []
 
     for i, story in enumerate(stories):
+        front = i < FRONT_MAX
         if i == 0:
-            slot = GridSlot(story_id=story.id, section="world", size="lead",
-                            role="feature", dominant=True, columns=min(cols, 6), with_photo=True,
+            slot = GridSlot(story_id=story.id, section="world", size="lead", role="feature",
+                            dominant=True, columns=cols, with_photo=True, front=True,
                             pull_quote=(story.deck or None))
-        elif i == 1:
+        elif i in (1, 2):  # row: two features (lo + hi = cols)
+            slot = GridSlot(story_id=story.id, section="world", size="medium", role="feature",
+                            columns=(lo if i == 1 else hi), with_photo=(i == 1), front=front)
+        elif i in (3, 4):  # row: standard + sidebar (lo + hi = cols)
             slot = GridSlot(story_id=story.id, section="world", size="medium",
-                            role="feature", columns=mid, with_photo=True)
-        elif n > 5 and i >= n - 2:
-            # tail items become teasers / анонсы
+                            role=("standard" if i == 3 else "sidebar"),
+                            columns=(lo if i == 3 else hi), front=front)
+        elif i in (5, 6):  # row: a brief + a teaser
+            teaser = i == 6
             slot = GridSlot(story_id=story.id, section="world", size="brief",
-                            role="teaser", body_policy="teaser_only", columns=small)
-        elif i % 4 == 0:
-            slot = GridSlot(story_id=story.id, section="world", size="brief",
-                            role="brief", columns=small)
-        else:
-            slot = GridSlot(story_id=story.id, section="world", size="medium",
-                            role="standard", columns=mid)
+                            role=("teaser" if teaser else "brief"),
+                            body_policy=("teaser_only" if teaser else "full"),
+                            columns=sm, front=front)
+        else:              # flow continuation (pages 2+)
+            teaser = i >= n - 2
+            role = "teaser" if teaser else ("brief" if i % 3 == 0 else "standard")
+            slot = GridSlot(story_id=story.id, section="world",
+                            size=("brief" if role in ("brief", "teaser") else "medium"),
+                            role=role, body_policy=("teaser_only" if teaser else "full"),
+                            columns=(sm if role in ("brief", "teaser") else lo), front=False)
         slots.append(slot)
 
     return GridPlan(section_order=["world"], slots=slots)

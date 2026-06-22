@@ -66,26 +66,27 @@ def _stories() -> list[Story]:
 
 
 def sample_grid_plan(*, page_format: str, columns: int, section_order: list[str]) -> GridPlan:
-    half = max(2, min(columns, 6) // 2)
-    third = max(2, min(columns, 6) // 2)
+    cols = min(columns, 6)
+    hi = (cols + 1) // 2          # ceil half
+    lo = max(2, cols // 2)        # floor half (>=2)
+    sm = 2                        # narrow modules tile the bottom row
     slots = [
-        # Dominant lead feature — the Center of Visual Impact.
+        # Dominant lead feature — the Center of Visual Impact (full bleed).
         GridSlot(story_id="s-lead", section="world", size="lead", role="feature",
-                 dominant=True, columns=min(columns, 6), with_photo=False,
+                 dominant=True, columns=cols, with_photo=False,
                  pull_quote="Контекст важнее заголовка, перспектива важнее сенсации."),
-        GridSlot(story_id="s-eu", section="world", size="medium", role="standard", columns=third),
-        # Secondary feature.
-        GridSlot(story_id="s-mkt", section="business", size="medium", role="feature", columns=third),
-        # Boxed sidebar companion.
-        GridSlot(story_id="s-firm", section="business", size="brief", role="sidebar", columns=half),
-        GridSlot(story_id="s-ai", section="tech", size="medium", role="standard", columns=third),
-        # Brief.
-        GridSlot(story_id="s-chip", section="tech", size="brief", role="brief", columns=half),
-        # Two teasers / анонсы.
+        # Row 2: two features side by side (lo + hi = cols).
+        GridSlot(story_id="s-eu", section="world", size="medium", role="feature", columns=lo),
+        GridSlot(story_id="s-mkt", section="business", size="medium", role="feature", columns=hi),
+        # Row 3: a standard article + a boxed sidebar (lo + hi = cols).
+        GridSlot(story_id="s-ai", section="tech", size="medium", role="standard", columns=lo),
+        GridSlot(story_id="s-firm", section="business", size="brief", role="sidebar", columns=hi),
+        # Row 4: a brief + two teasers / анонсы.
+        GridSlot(story_id="s-chip", section="tech", size="brief", role="brief", columns=sm),
         GridSlot(story_id="s-art", section="culture", size="brief", role="teaser",
-                 body_policy="teaser_only", columns=half),
+                 body_policy="teaser_only", columns=sm),
         GridSlot(story_id="s-film", section="culture", size="brief", role="teaser",
-                 body_policy="teaser_only", columns=half),
+                 body_policy="teaser_only", columns=sm),
     ]
     return GridPlan(page_format=page_format, section_order=section_order, slots=slots)
 
