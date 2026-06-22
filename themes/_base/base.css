@@ -61,33 +61,33 @@ main.paper { zoom: var(--scale, 1); }
   column-rule: var(--rule-weight) solid color-mix(in srgb, var(--ink) 35%, transparent);
 }
 
-/* ---- Front-page modular mosaic (CSS Grid; one page, Paged.js-safe) ------ */
+/* ---- Front-page modular mosaic (CSS Grid; airy, Paged.js-safe) ---------- */
 main.paper > .front {
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
-  /* Thin gaps + a tinted container background = authentic hairline rules
-     between every module (the CSS-Tricks "gap as divider" technique). */
-  gap: var(--rule-weight);
-  background: color-mix(in srgb, var(--ink) 32%, transparent);
-  align-items: stretch;            /* equal-height rows → clean full-height vertical rules */
+  column-gap: var(--gutter);
+  row-gap: 6mm;
+  align-items: start;          /* content-height modules; whitespace separates them */
   break-after: page;
 }
 main.paper > .front > .story {
   grid-column: span var(--span, 2);
   grid-row: span var(--row-span, 1);
   break-inside: avoid;
-  background: var(--paper);         /* fills the cell; the gaps show as rules */
-  padding: 1.5mm calc(var(--gutter) / 2) 3mm;
   margin: 0;
 }
 main.paper > .front > .story--dominant { grid-column: 1 / -1; }
-/* Dominant already sits above a gap rule; drop its own lead border/margins here. */
-main.paper > .front > .story.lead { border-bottom: none; margin: 0; padding-bottom: 3mm; }
-/* Each module's body flows in its own balanced columns (macro = grid, micro = multicol). */
+/* The lead is the only module set off by a rule — a single thin rule beneath it. */
+main.paper > .front > .story.lead {
+  border-bottom: var(--rule-weight) solid var(--ink);
+  padding-bottom: 4mm;
+  margin-bottom: 2mm;
+}
+/* Each module's body flows in balanced columns separated by the gutter — no
+   column rule, so the page reads clean and airy. */
 main.paper > .front > .story .story__body {
   column-count: var(--story-cols, 1);
   column-gap: var(--gutter);
-  column-rule: var(--rule-weight) solid color-mix(in srgb, var(--ink) 30%, transparent);
 }
 /* Optional full-width band (e.g. a section flag inside the mosaic). */
 .front-band { grid-column: 1 / -1; }
