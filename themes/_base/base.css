@@ -65,17 +65,24 @@ main.paper { zoom: var(--scale, 1); }
 main.paper > .front {
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
-  column-gap: var(--gutter);
-  align-items: start;
+  /* Thin gaps + a tinted container background = authentic hairline rules
+     between every module (the CSS-Tricks "gap as divider" technique). */
+  gap: var(--rule-weight);
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+  align-items: stretch;            /* equal-height rows → clean full-height vertical rules */
   break-after: page;
 }
 main.paper > .front > .story {
   grid-column: span var(--span, 2);
   grid-row: span var(--row-span, 1);
   break-inside: avoid;
-  margin: 0 0 4mm;
+  background: var(--paper);         /* fills the cell; the gaps show as rules */
+  padding: 1.5mm calc(var(--gutter) / 2) 3mm;
+  margin: 0;
 }
 main.paper > .front > .story--dominant { grid-column: 1 / -1; }
+/* Dominant already sits above a gap rule; drop its own lead border/margins here. */
+main.paper > .front > .story.lead { border-bottom: none; margin: 0; padding-bottom: 3mm; }
 /* Each module's body flows in its own balanced columns (macro = grid, micro = multicol). */
 main.paper > .front > .story .story__body {
   column-count: var(--story-cols, 1);
