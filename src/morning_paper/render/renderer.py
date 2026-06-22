@@ -129,6 +129,13 @@ class NodeRenderer:
             )
         return out_path
 
+    def web_html(self, doc: RenderDocument) -> str:
+        """Compose a self-contained web HTML string (for theme preview cards)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp) / "preview.html"
+            self.render_web(doc, out_path=out)
+            return out.read_text(encoding="utf-8")
+
 
 def _object_store_root() -> Path:
     url = get_settings().secrets.mp_object_store_url

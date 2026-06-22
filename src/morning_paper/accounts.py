@@ -37,6 +37,9 @@ class UserAccounts:
     tz: str = "UTC"
     deliver_channel: str = "file"
     sources: dict[str, SourceAccount] = field(default_factory=dict)
+    # Per-user reading-comfort overrides applied on top of the chosen theme:
+    # {scale, leading, accent, body_size, body_font, headline_font, dropcap}.
+    style_overrides: dict = field(default_factory=dict)
 
 
 def _users_dir() -> Path:
@@ -74,6 +77,7 @@ def load(user_id: str) -> UserAccounts:
         tz=data.get("tz", "UTC"),
         deliver_channel=data.get("deliver_channel", "file"),
         sources=sources,
+        style_overrides=data.get("style_overrides", {}) or {},
     )
 
 
@@ -86,6 +90,7 @@ def save(acc: UserAccounts) -> None:
         "tz": acc.tz,
         "deliver_channel": acc.deliver_channel,
         "sources": {sid: asdict(sa) for sid, sa in acc.sources.items()},
+        "style_overrides": acc.style_overrides,
     }
     p.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 

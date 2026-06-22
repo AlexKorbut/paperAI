@@ -299,19 +299,35 @@ def s7_render(ctx: IssueContext, **kwargs) -> IssueContext:
         logger.warning("render skipped: no stories or grid plan")
         return ctx
 
-    stories_model = [
-        Story(
-            id=s.id,
-            section=_slot_section(s.id, ctx.grid_plan),
-            headline=s.headline,
-            deck=s.deck or None,
-            body_html=s.body_html,
-            byline=s.byline or None,
-            source=s.source_url,
-            source_url=s.source_url,
+    slot_by_story = {sl.story_id: sl for sl in ctx.grid_plan.slots}
+    stories_model = []
+    for s in ctx.stories:
+        sl = slot_by_story.get(s.id)
+        role = sl.effective_role if sl else "standard"
+        section = sl.section if sl else _slot_section(s.id, ctx.grid_plan)
+        stories_model.append(
+            Story(
+                id=s.id,
+                section=section,
+                kind=role,
+                kicker=section.upper() if section else None,
+                headline=s.headline,
+                deck=s.deck or None,
+                teaser_text=(s.deck or None) if role == "teaser" else None,
+                body_html=s.body_html,
+                byline=s.byline or None,
+                source=s.source_url,
+                source_url=s.source_url,
+            )
         )
-        for s in ctx.stories
-    ]
+
+    overrides = {}
+    try:
+        from .. import accounts
+
+        overrides = accounts.load(ctx.user_id).style_overrides or {}
+    except Exception:
+        overrides = {}
 
     doc = build_render_document(
         issue_id=ctx.issue_id,
@@ -321,6 +337,7 @@ def s7_render(ctx: IssueContext, **kwargs) -> IssueContext:
         stories=stories_model,
         grid_plan=ctx.grid_plan,
         issue_date=date.today(),
+        style_overrides=overrides,
     )
     ctx.render_document = doc
 

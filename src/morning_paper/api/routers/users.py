@@ -6,9 +6,35 @@ from fastapi import APIRouter, Depends
 
 from ... import accounts
 from ..deps import Principal, get_principal, require_owner
-from ..schemas import UserOut, UserUpdate
+from ..schemas import StyleOverrides, UserOut, UserUpdate
 
 router = APIRouter(tags=["users"])
+
+
+@router.get("/users/{user_id}/style")
+def get_style(user_id: str, principal: Principal = Depends(get_principal)) -> dict:
+    """The user's reading-comfort overrides (scale, leading, accent, fonts, dropcap)."""
+    require_owner(principal, user_id)
+    return accounts.load(user_id).style_overrides or {}
+
+
+@router.put("/users/{user_id}/style")
+def put_style(
+    user_id: str, body: StyleOverrides, principal: Principal = Depends(get_principal)
+) -> dict:
+    """Merge in tuning overrides (only the provided keys change; null clears a key)."""
+    require_owner(principal, user_id)
+    acc = accounts.load(user_id)
+    incoming = body.model_dump(exclude_unset=True)
+    merged = dict(acc.style_overrides or {})
+    for k, v in incoming.items():
+        if v is None:
+            merged.pop(k, None)
+        else:
+            merged[k] = v
+    acc.style_overrides = merged
+    accounts.save(acc)
+    return merged
 
 
 # --------------------------------------------------------------------------- #

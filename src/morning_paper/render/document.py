@@ -22,6 +22,7 @@ def build_render_document(
     issue_no: str | None = None,
     edition: str | None = None,
     issue_date: date | None = None,
+    style_overrides: dict | None = None,
 ) -> RenderDocument:
     by_id = {s.id: s for s in stories}
     views: dict[str, StoryView] = {}
@@ -38,6 +39,10 @@ def build_render_document(
             byline=story.byline,
             caption=story.source,  # attribution shown as caption/source line
             image_ref=story.image_ref if slot.with_photo else None,
+            kicker=story.kicker,
+            teaser_text=story.teaser_text,
+            dateline=story.dateline,
+            kind=story.kind,
         )
         if slot.with_photo and story.image_ref:
             images[story.image_ref] = story.image_ref
@@ -56,4 +61,5 @@ def build_render_document(
         grid_plan=grid_plan,
         stories=views,
         images=images,
+        style_overrides=style_overrides or {},
     )

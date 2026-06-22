@@ -153,6 +153,16 @@ export interface Group {
   created_at: string;
 }
 
+export interface StyleOverrides {
+  scale?: number | null;
+  leading?: number | null;
+  accent?: string | null;
+  body_size?: string | null;
+  body_font?: string | null;
+  headline_font?: string | null;
+  dropcap?: boolean | null;
+}
+
 export interface MarketplaceTheme {
   id: string;
   display_name: string;

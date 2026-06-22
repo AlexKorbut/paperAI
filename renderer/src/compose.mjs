@@ -38,10 +38,52 @@ function cssVarsBlock(manifest) {
     "--rule-weight": g.rule_weight || "1px",
     "--gutter": g.gutter || "10px",
   };
+  // Optional per-theme type tokens (override base.css readability defaults).
+  const typeTokens = {
+    "--scale": t.scale_factor,
+    "--leading": t.leading,
+    "--body-size": t.body_pt,
+    "--fs-masthead": t.masthead_pt,
+    "--fs-lead": t.lead_pt,
+    "--fs-headline": t.headline_pt,
+    "--fs-dominant": t.dominant_pt,
+    "--fs-feature": t.feature_pt,
+  };
+  for (const [k, v] of Object.entries(typeTokens)) {
+    if (v !== undefined && v !== null && v !== "") vars[k] = String(v);
+  }
   const body = Object.entries(vars)
     .map(([k, v]) => `  ${k}: ${v};`)
     .join("\n");
-  return `:root[data-theme="${manifest.id}"] {\n${body}\n}`;
+  // One theme per document, so plain :root (data-theme lives on <body>, which a
+  // :root[data-theme] selector would NOT match — that was a latent no-op).
+  return `:root {\n${body}\n}`;
+}
+
+// Per-user reading-comfort overrides — emitted AFTER theme CSS so the user wins.
+const _OVERRIDE_VARS = {
+  scale: "--scale",
+  leading: "--leading",
+  accent: "--accent",
+  body_size: "--body-size",
+  body_font: "--body-font",
+  headline_font: "--headline-font",
+  masthead_font: "--masthead-font",
+};
+
+function userVarsBlock(manifest, overrides) {
+  if (!overrides || typeof overrides !== "object") return "";
+  const lines = [];
+  for (const [key, cssVar] of Object.entries(_OVERRIDE_VARS)) {
+    const v = overrides[key];
+    if (v === undefined || v === null || v === "") continue;
+    lines.push(`  ${cssVar}: ${key.endsWith("_font") ? `"${v}"` : v};`);
+  }
+  if (overrides.dropcap === false) {
+    lines.push("  --dropcap-size: 1em;", "  --dropcap-float: none;");
+  }
+  if (!lines.length) return "";
+  return `:root {\n${lines.join("\n")}\n}`;
 }
 
 function pageRule(manifest) {
@@ -71,19 +113,57 @@ function webCss() {
 }
 @media screen and (max-width: 820px) {
   .section__grid, .lead .story__body { column-count: 2 !important; }
+  main.paper > .front { grid-template-columns: repeat(2, 1fr); }
+  main.paper > .front > .story { grid-column: 1 / -1; }
+  main.paper > .front > .story .story__body { column-count: 2 !important; }
 }
 @media screen and (max-width: 560px) {
   .section__grid, .lead .story__body { column-count: 1 !important; }
+  main.paper > .front { grid-template-columns: 1fr; }
+  main.paper > .front > .story .story__body { column-count: 1 !important; }
   main.paper { padding: 18px; margin: 0; }
   .masthead__title, .masthead__logo svg { font-size: 11vw; max-height: 14vw; }
   .lead .story__headline { font-size: 8vw; }
 }`;
 }
 
+const SIZE_TO_ROLE = { lead: "feature", medium: "standard", brief: "brief" };
+
+// Text columns INSIDE a story module (mirrors GridSlot.effective_story_cols).
+function effStoryCols(slot) {
+  if (slot.story_cols != null) return Math.max(1, slot.story_cols);
+  const role = slot.role || SIZE_TO_ROLE[slot.size] || "standard";
+  if (slot.dominant) return Math.max(1, Math.min(4, Math.floor(slot.columns / 2)));
+  if (["brief", "teaser", "sidebar", "factbox"].includes(role)) return 1;
+  return Math.max(1, Math.min(3, Math.floor(slot.columns / 2)));
+}
+
 function storyArticle(view, slot) {
   if (!view) return "";
-  const cls = `story story--${slot.size}`;
-  const span = `--span:${slot.columns}`;
+  const role = slot.role || SIZE_TO_ROLE[slot.size] || "standard";
+  // `lead` (bare) lets themes' `.lead ...` rules style the dominant module.
+  const dominant = slot.dominant ? " story--dominant lead" : "";
+  // Keep the legacy size class (themes style off it) + add role/furniture classes.
+  const cls = `story story--${slot.size} story--role-${role}${dominant}`;
+  const span = `--span:${slot.columns}; --row-span:${slot.row_span || 1}; --story-cols:${effStoryCols(slot)}`;
+
+  const kicker = view.kicker
+    ? `<p class="story__kicker">${esc(view.kicker)}</p>`
+    : "";
+  const headline = `<h2 class="story__headline">${esc(view.headline)}</h2>`;
+
+  // A teaser ("анонс") is the same story rendered small: kicker + headline +
+  // one teaser line + a refer arrow, no body or photo.
+  if (role === "teaser" || slot.body_policy === "teaser_only") {
+    const tt = view.teaser_text || view.deck || "";
+    return `<article class="${cls} story--teaser" style="${span}">
+  ${kicker}
+  ${headline}
+  ${tt ? `<p class="story__teaser">${esc(tt)}</p>` : ""}
+  <p class="story__refer">${esc(view.byline || "Подробнее внутри")} <span class="story__refer-arrow">&#8594;</span></p>
+</article>`;
+  }
+
   const photo =
     slot.with_photo && view.image_ref
       ? `<figure class="story__photo"><img src="${esc(view.image_ref)}" alt=""/>${
@@ -95,46 +175,61 @@ function storyArticle(view, slot) {
   const quote = slot.pull_quote
     ? `<blockquote class="story__pull">${esc(slot.pull_quote)}</blockquote>`
     : "";
+  // Dateline runs in to the first paragraph: "MINSK — The story begins…".
+  let body = view.body_html || "";
+  if (view.dateline) {
+    const run = `<span class="story__dateline">${esc(view.dateline)}</span> `;
+    body = /^\s*<p[^>]*>/i.test(body) ? body.replace(/^(\s*<p[^>]*>)/i, `$1${run}`) : run + body;
+  }
   // body_html is trusted newspaper-register HTML produced by our own editorial stage.
   return `<article class="${cls}" style="${span}">
-  <h2 class="story__headline">${esc(view.headline)}</h2>
+  ${kicker}
+  ${headline}
   ${deck}
   ${byline}
   ${photo}
   ${quote}
-  <div class="story__body">${view.body_html || ""}</div>
+  <div class="story__body">${body}</div>
 </article>`;
 }
 
 function renderSections(doc) {
-  const slotsByStory = new Map(doc.grid_plan.slots.map((s) => [s.story_id, s]));
+  const slots = doc.grid_plan.slots;
   const order =
     doc.grid_plan.section_order && doc.grid_plan.section_order.length
       ? doc.grid_plan.section_order
-      : [...new Set(doc.grid_plan.slots.map((s) => s.section))];
+      : [...new Set(slots.map((s) => s.section))];
 
-  const lead = doc.grid_plan.slots.find((s) => s.size === "lead");
-  const leadHtml = lead
-    ? `<section class="lead">${storyArticle(doc.stories[lead.story_id], lead)}</section>`
-    : "";
+  const isFront = (s) => s.front !== false;
+  const frontSlots = slots.filter(isFront);
+  const flowSlots = slots.filter((s) => !isFront(s));
 
+  // FRONT PAGE: one modular CSS-Grid mosaic. Dominant first (full-bleed), then
+  // the rest tile by column span. Kickers carry the section, so no big section
+  // bands here — it reads like a real front page. Kept to one page (break-after).
+  const dominant = frontSlots.find((s) => s.dominant);
+  const ordered = dominant ? [dominant, ...frontSlots.filter((s) => s !== dominant)] : frontSlots;
+  const frontItems = ordered
+    .map((s) => storyArticle(doc.stories[s.story_id], s))
+    .join("\n");
+  const frontHtml = frontSlots.length ? `<div class="front">${frontItems}</div>` : "";
+
+  // FLOW continuation (pages 2+): remaining stories grouped into sections, each a
+  // multi-column flow — Paged.js-safe (no grid cell spans a page break).
   const sections = order
     .map((sec) => {
-      const slots = doc.grid_plan.slots.filter(
-        (s) => s.section === sec && s.size !== "lead"
-      );
-      if (!slots.length) return "";
-      const items = slots
-        .map((s) => storyArticle(doc.stories[s.story_id], s))
-        .join("\n");
+      const ss = flowSlots.filter((s) => s.section === sec);
+      if (!ss.length) return "";
+      const items = ss.map((s) => storyArticle(doc.stories[s.story_id], s)).join("\n");
       return `<section class="section section--${esc(sec)}">
   <h3 class="section__title">${esc(sec)}</h3>
   <div class="section__grid">${items}</div>
 </section>`;
     })
     .join("\n");
+  const flowHtml = sections.trim() ? `<div class="flow">${sections}</div>` : "";
 
-  return leadHtml + "\n" + sections;
+  return frontHtml + "\n" + flowHtml;
 }
 
 export async function composeHtml(doc, { themesDir, assetsDir, rendererDir, web = false }) {
@@ -194,6 +289,7 @@ ${cssVarsBlock(manifest)}
 ${baseCss}
 ${themeCss}
 ${web ? webCss() : ""}
+${userVarsBlock(manifest, doc.style_overrides)}
 </style>
 </head>
 <body data-theme="${esc(doc.theme_id)}">

@@ -18,6 +18,7 @@ import type {
   Profile,
   SourceAccount,
   SourceInfo,
+  StyleOverrides,
   Theme,
   User,
   UserUpdate,
@@ -81,6 +82,11 @@ export const api = {
   getUser: (id: string) => request<User>(`/v1/users/${enc(id)}`),
   updateUser: (id: string, body: UserUpdate) =>
     request<User>(`/v1/users/${enc(id)}`, { method: "PUT", body: JSON.stringify(body) }),
+
+  // Typography / reading-comfort overrides
+  getStyle: (id: string) => request<StyleOverrides>(`/v1/users/${enc(id)}/style`),
+  putStyle: (id: string, body: StyleOverrides) =>
+    request<StyleOverrides>(`/v1/users/${enc(id)}/style`, { method: "PUT", body: JSON.stringify(body) }),
 
   // Catalogs
   getThemes: () => request<Theme[]>(`/v1/themes`),
