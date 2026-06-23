@@ -116,11 +116,13 @@ function webCss() {
   main.paper > .front { grid-template-columns: repeat(2, 1fr); }
   main.paper > .front > .story { grid-column: 1 / -1; }
   main.paper > .front > .story .story__body { column-count: 2 !important; }
+  .columns-flow { column-count: 2 !important; }
 }
 @media screen and (max-width: 560px) {
   .section__grid, .lead .story__body { column-count: 1 !important; }
   main.paper > .front { grid-template-columns: 1fr; }
   main.paper > .front > .story .story__body { column-count: 1 !important; }
+  .columns-flow { column-count: 1 !important; }
   main.paper { padding: 18px; margin: 0; }
   .masthead__title, .masthead__logo svg { font-size: 11vw; max-height: 14vw; }
   .lead .story__headline { font-size: 8vw; }
@@ -193,7 +195,50 @@ function storyArticle(view, slot) {
 </article>`;
 }
 
-function renderSections(doc) {
+// A single story in the antique continuous-column flow: a small-caps subhead
+// (if the story carries a headline) + justified body, with the dateline run in
+// to the first paragraph ("LONDON, Oct. 15."). No modern furniture (kicker,
+// deck, byline, photo) — period broadsheets had none.
+function chronicleArticle(view) {
+  if (!view) return "";
+  const head = view.headline
+    ? `<p class="chron__head">${esc(view.headline)}</p>`
+    : "";
+  let body = view.body_html || "";
+  if (view.dateline) {
+    const run = `<span class="story__dateline">${esc(view.dateline)}</span> `;
+    body = /^\s*<p[^>]*>/i.test(body) ? body.replace(/^(\s*<p[^>]*>)/i, `$1${run}`) : run + body;
+  }
+  return `<article class="chron">
+  ${head}
+  ${body}
+</article>`;
+}
+
+// COLUMNS layout (antique broadsheet, e.g. The London Chronicle, 1759): one
+// continuous multi-column flow. Section heads are centred small-caps lines that
+// sit INSIDE the column flow (not full-width bands). Paged.js-safe: multi-column
+// text reflows across pages (only grid cells can't be split).
+function renderColumns(doc) {
+  const slots = doc.grid_plan.slots;
+  const order =
+    doc.grid_plan.section_order && doc.grid_plan.section_order.length
+      ? doc.grid_plan.section_order
+      : [...new Set(slots.map((s) => s.section))];
+
+  const parts = [];
+  for (const sec of order) {
+    const ss = slots.filter((s) => s.section === sec);
+    if (!ss.length) continue;
+    parts.push(`<h3 class="flow-head">${esc(sec)}</h3>`);
+    for (const s of ss) parts.push(chronicleArticle(doc.stories[s.story_id]));
+  }
+  return `<div class="columns-flow">${parts.join("\n")}</div>`;
+}
+
+function renderSections(doc, layout = "mosaic") {
+  if (layout === "columns") return renderColumns(doc);
+
   const slots = doc.grid_plan.slots;
   const order =
     doc.grid_plan.section_order && doc.grid_plan.section_order.length
@@ -295,7 +340,7 @@ ${userVarsBlock(manifest, doc.style_overrides)}
 <body data-theme="${esc(doc.theme_id)}">
 ${mastheadHtml}
 <main class="paper">
-${renderSections(doc)}
+${renderSections(doc, (manifest.format && manifest.format.layout) || "mosaic")}
 </main>
 </body>
 </html>`;

@@ -26,6 +26,9 @@ class FormatSpec(BaseModel):
     bleed_mm: float = 0.0
     color_mode: ColorMode = "bw"
     duotone: list[str] = Field(default_factory=list)
+    # "mosaic" = modular CSS-Grid front page (default). "columns" = continuous
+    # multi-column flow for antique broadsheets (e.g. london-chronicle).
+    layout: Literal["mosaic", "columns"] = "mosaic"
 
 
 class GridSpec(BaseModel):

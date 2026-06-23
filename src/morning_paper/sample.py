@@ -134,13 +134,106 @@ def specimen_render_document(theme_id: str, *, locale: str = "ru", style_overrid
     )
 
 
+# ---- Antique "columns" layout demo (The London Chronicle, 1759) ------------
+# Period-flavoured English placeholder so the specimen reads "точь в точь" like
+# the original evening post. In production the user's real content flows into the
+# same continuous-column layout. id, section (= small-caps head), dateline, body.
+_CHRON_SECTIONS = ["The London Gazette", "Foreign Affairs", "London",
+                   "Country News", "Ship News", "Bankrupts"]
+_CHRON_ROWS = [
+    ("c-gaz1", "The London Gazette", None,
+     "<p>Whitehall, October 13. The King hath been graciously pleased to grant "
+     "unto the Reverend Doctor Markham the deanery of Rochester, void by the "
+     "translation of the late incumbent; as also to constitute and appoint divers "
+     "officers of the household, whose names shall in due course be made known.</p>"
+     "<p>His Majesty hath likewise been pleased to order, that a medal be struck "
+     "in commemoration of the late signal successes of his arms, both by sea and "
+     "land, to the lasting honour of the British nation.</p>"),
+    ("c-gaz2", "The London Gazette", "St. James's, October 13.",
+     "<p>This day the Right Honourable the Lords Commissioners of the Admiralty "
+     "waited upon his Majesty with the agreeable advices lately received from the "
+     "fleet, and were received most graciously.</p>"),
+    ("c-for1", "Foreign Affairs", "Hamburgh, September 21.",
+     "<p>The advices we have this day received from the army import, that the "
+     "allied forces had passed the river without opposition, and were advancing by "
+     "hasty marches towards the enemy, who appeared in no condition to dispute the "
+     "passage. It is added, that several magazines had fallen into our hands, with "
+     "a considerable train of artillery.</p>"),
+    ("c-for2", "Foreign Affairs", "Vienna, September 26.",
+     "<p>Her Imperial Majesty hath been pleased to order a solemn Te Deum to be "
+     "sung in the cathedral, in acknowledgment of the late advantages obtained over "
+     "the common adversary; at which the whole court assisted.</p>"),
+    ("c-lon1", "London", "London, October 15.",
+     "<p>We hear that the merchants trading to the coast of Africa have resolved "
+     "to present an humble address of congratulation upon the reduction of the "
+     "enemy's settlements, and the security thereby given to the commerce of these "
+     "kingdoms.</p><p>Yesterday the sessions ended at the Old Bailey, when seven "
+     "prisoners received sentence of death, eleven were ordered for transportation, "
+     "and the remainder discharged by proclamation.</p>"),
+    ("c-lon2", "London", None,
+     "<p>Letters from Portsmouth advise, that the squadron under the command of "
+     "Rear Admiral Holmes lay ready to put to sea on the first fair wind, and that "
+     "the troops were all embarked in good health and high spirits.</p>"),
+    ("c-lon3", "London", None,
+     "<p>On Saturday last a fire broke out in a warehouse near Thames-street, "
+     "which consumed great quantities of merchandise before it could be subdued; "
+     "but we hear of no lives lost.</p>"),
+    ("c-cty1", "Country News", "Bristol, October 12.",
+     "<p>The fair held here this week was more numerously attended than for some "
+     "years past, and the dealers in woollen goods met with a ready vent for their "
+     "commodities.</p>"),
+    ("c-shp1", "Ship News", "Deal, October 14.",
+     "<p>Came down and sailed the Friendship for Lisbon, the Two Brothers for "
+     "Oporto, and the Betsey for Jamaica. Remain in the Downs his Majesty's ship "
+     "the Centaur, with several merchantmen outward bound. Wind at W. by S.</p>"),
+    ("c-shp2", "Ship News", "Gravesend, October 14.",
+     "<p>Passed by the Prince of Wales, Captain Bell, from Jamaica; the Hope, "
+     "Captain Reed, from Oporto; and the Diligence, Captain Snow, from Rotterdam, "
+     "all bound up the river.</p>"),
+    ("c-bnk1", "Bankrupts", None,
+     "<p>William Wells, of Lombard-street, London, merchant, to surrender the 23d "
+     "and 30th of October, and the 24th of November, at Guildhall.</p>"
+     "<p>Thomas Hartley, of Leeds, in the county of York, clothier, to surrender "
+     "the 29th and 31st of October, and the 24th of November, at Leeds.</p>"),
+]
+
+
+def chronicle_render_document(theme_id: str, *, locale: str = "en", style_overrides: dict | None = None):
+    """The antique continuous-column specimen (layout == "columns")."""
+    stories = [
+        Story(id=cid, section=section, kind="standard", headline="",
+              dateline=dateline, body_html=body, byline=None,
+              source="The London Chronicle", source_url="#")
+        for cid, section, dateline, body in _CHRON_ROWS
+    ]
+    grid = GridPlan(
+        page_format=load_manifest(theme_id).format.page,
+        section_order=_CHRON_SECTIONS,
+        slots=[
+            GridSlot(story_id=cid, section=section, size="medium", columns=3)
+            for cid, section, _dl, _body in _CHRON_ROWS
+        ],
+    )
+    doc = build_render_document(
+        issue_id="chronicle-0437", theme_id=theme_id, locale=locale,
+        title="The London Chronicle", stories=stories, grid_plan=grid,
+        style_overrides=style_overrides or {},
+    )
+    # The masthead SVG carries Vol/Nº; the meta line shows the period date range.
+    doc.masthead.date = "From SATURDAY, October 13, to TUESDAY, October 16, 1759."
+    return doc
+
+
 def sample_render_document(theme_id: str, *, locale: str = "ru"):
     """Build a complete RenderDocument for a theme using sample content.
 
     Uses a fixed generic section_order so the sample GridSlots (which reference
     "world", "business", "tech", "culture") render consistently across every theme.
+    Antique "columns" themes get a period-correct continuous-column specimen.
     """
     manifest = load_manifest(theme_id)
+    if manifest.format.layout == "columns":
+        return chronicle_render_document(theme_id)
     grid = sample_grid_plan(
         page_format=manifest.format.page,
         columns=manifest.grid.columns,

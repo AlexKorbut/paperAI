@@ -1,0 +1,130 @@
+/* london-chronicle: a Georgian evening broadsheet (The London Chronicle, 1759).
+   One ornate engraved masthead over three dense, hairline-ruled, justified Caslon
+   columns; small-caps section heads sit inside the column flow; a single engraved
+   drop cap opens the page; aged laid paper. The body is set LARGER than the ~7pt
+   original (theme.toml body_pt) so it stays readable while keeping the dense look.
+   Scoped via [data-theme="…"] descendant selectors — data-theme lives on <body>. */
+
+body[data-theme="london-chronicle"] {
+  font-family: "IM Fell English", Georgia, "Times New Roman", serif;
+  background: #e9e0c8;
+  color: #211c12;
+}
+
+/* Aged laid paper: faint foxing + a trimmed-sheet edge. */
+[data-theme="london-chronicle"] main.paper {
+  border: 1px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  padding: 2.5mm 6mm 3mm;
+  background-image:
+    radial-gradient(circle at 16% 10%, rgba(58, 44, 20, 0.05) 0 20%, transparent 58%),
+    radial-gradient(circle at 84% 82%, rgba(58, 44, 20, 0.06) 0 18%, transparent 52%),
+    radial-gradient(circle at 50% 50%, rgba(58, 44, 20, 0.03) 0 40%, transparent 70%);
+}
+
+/* ---- Masthead: the engraved SVG carries the brand; no extra base rule ---- */
+[data-theme="london-chronicle"] .masthead {
+  border: 0;
+  padding: 1mm 0 0;
+  margin-bottom: 1.5mm;
+}
+[data-theme="london-chronicle"] .masthead__logo svg { max-height: 150px; width: 100%; }
+
+/* The date line below the subtitle: centred, mixed-case, between hairline rules
+   ("From SATURDAY, October 13, to TUESDAY, October 16, 1759."). */
+[data-theme="london-chronicle"] .masthead__meta {
+  justify-content: center;
+  gap: 10px;
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 11pt;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  color: #211c12;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 1.5mm;
+}
+
+/* ---- Continuous three-column flow --------------------------------------- */
+[data-theme="london-chronicle"] .columns-flow {
+  column-count: var(--columns);
+  column-gap: var(--gutter);
+  column-rule: 0.5px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  /* Balance the three columns so the dense front sits as one full sheet beneath
+     the masthead (Paged.js keeps a balanced multicol whole on the page rather
+     than splitting it across the masthead boundary). The sample is sized to fill
+     the sheet; real editions of more than a page flow their remainder onward. */
+  column-fill: balance;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Section head: centred small-caps line that sits INSIDE the column flow,
+   between thin rules (e.g. "The London Gazette", "BANKRUPTS", "SHIP NEWS"). */
+[data-theme="london-chronicle"] .flow-head {
+  font-family: "IM Fell English", Georgia, serif;
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: 12.5pt;
+  letter-spacing: 0.6px;
+  text-align: center;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 0.6mm 0;
+  margin: 2mm 0 1.6mm;
+  break-after: avoid;
+  break-inside: avoid;
+  string-set: section content();   /* feeds the @page running head */
+}
+/* The first head crowns the page; no rule riding above the very top. */
+[data-theme="london-chronicle"] .columns-flow > .flow-head:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+
+/* A story in the flow: tight, justified, antique. */
+[data-theme="london-chronicle"] .chron { margin: 0 0 1.4mm; }
+[data-theme="london-chronicle"] .chron__head {
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: 11pt;
+  letter-spacing: 0.4px;
+  text-align: center;
+  margin: 1mm 0 0.8mm;
+  break-after: avoid;
+}
+[data-theme="london-chronicle"] .chron p {
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: var(--body-size, 11.5pt);
+  line-height: var(--leading, 1.3);
+  text-align: justify;
+  margin: 0 0 1.2mm;
+  orphans: 2;
+  widows: 2;
+}
+
+/* Dateline / place run-in at the head of an item: italic, period style
+   ("Hamburgh, September 21." / "LONDON, October 15."). */
+[data-theme="london-chronicle"] .chron .story__dateline {
+  font-weight: 400;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* The engraved masthead IS the page head — suppress the base running head above
+   it (the 1759 front carries none); keep the centred page number at the foot. */
+@page { @top-center { content: none; } }
+
+/* A single large engraved drop cap opens the whole page (first item only). */
+[data-theme="london-chronicle"] .columns-flow > .chron:first-of-type p:first-of-type::first-letter {
+  font-family: "IM Fell English", Georgia, serif;
+  font-weight: 700;
+  font-size: 3.8em;
+  line-height: 0.72;
+  float: left;
+  padding: 2px 4px 0 0;
+  color: #211c12;
+}
