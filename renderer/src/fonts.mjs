@@ -21,6 +21,23 @@ function formatFor(ext) {
   );
 }
 
+// Infer weight/style from the file name (e.g. "EBGaramond-BoldItalic.woff2").
+// Without these descriptors every face of a family collapses onto the same
+// normal/400 slot, and the LAST-declared file wins — so a "Regular, Bold" pair
+// renders all body text bold, and "Regular, Italic" renders it italic. Tagging
+// each face lets normal text pick Regular while bold/italic stay available.
+function styleFor(file) {
+  const n = file.toLowerCase();
+  const italic = /italic|oblique/.test(n);
+  let weight = 400;
+  if (/black|heavy/.test(n)) weight = 900;
+  else if (/extrabold|ultrabold/.test(n)) weight = 800;
+  else if (/semibold|demibold/.test(n)) weight = 600;
+  else if (/\bbold\b|bold/.test(n)) weight = 700;
+  else if (/light/.test(n)) weight = 300;
+  return { weight, style: italic ? "italic" : "normal" };
+}
+
 export async function fontFaceCss(manifest, themeDir) {
   const fonts = manifest.fonts || [];
   const blocks = [];
@@ -36,8 +53,9 @@ export async function fontFaceCss(manifest, themeDir) {
       const dataUrl = `data:${MIME[ext] || "font/woff2"};base64,${buf.toString(
         "base64"
       )}`;
+      const { weight, style } = styleFor(path.basename(rel));
       blocks.push(
-        `@font-face {\n  font-family: "${font.family}";\n  src: url("${dataUrl}") format("${formatFor(
+        `@font-face {\n  font-family: "${font.family}";\n  font-weight: ${weight};\n  font-style: ${style};\n  src: url("${dataUrl}") format("${formatFor(
           ext
         )}");\n  font-display: swap;\n}`
       );

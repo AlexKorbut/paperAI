@@ -1,0 +1,128 @@
+/* petrine-vedomosti: «Вѣдомости» Петровской эпохи (1703) — первая русская
+   печатная газета. Гравированный двуглавый орёл над тремя плотными выключенными
+   колонками гражданского шрифта; прописные центрированные рубрики внутри потока;
+   одна большая буквица открывает полосу; пергаментная бумага с двойной рамкой.
+   Кегль КРУПНЕЕ микро-оригинала (theme.toml body_pt). Кириллица: рубрики через
+   text-transform:uppercase (small-caps-глифов у кириллицы в шрифте нет).
+   Скоупится через [data-theme="…"] — data-theme живёт на <body>. */
+
+body[data-theme="petrine-vedomosti"] {
+  font-family: "Vollkorn", "PT Serif", Georgia, serif;
+  background: #e7dec2;
+  color: #241c10;
+}
+
+/* Пергамент: лёгкое «фоксинг»-пятно + двойная гравированная рамка полосы. */
+[data-theme="petrine-vedomosti"] main.paper {
+  border: 1.4px double color-mix(in srgb, var(--ink) 60%, transparent);
+  outline: 0.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
+  outline-offset: 1.4mm;
+  padding: 3mm 6mm 3.5mm;
+  background-image:
+    radial-gradient(circle at 14% 12%, rgba(107, 74, 35, 0.06) 0 18%, transparent 56%),
+    radial-gradient(circle at 86% 84%, rgba(107, 74, 35, 0.07) 0 16%, transparent 50%),
+    radial-gradient(circle at 50% 48%, rgba(107, 74, 35, 0.035) 0 40%, transparent 72%);
+}
+
+/* Мастхед: гравированный SVG (орёл + титул) несёт бренд. */
+[data-theme="petrine-vedomosti"] .masthead {
+  border: 0;
+  padding: 1mm 0 0;
+  margin-bottom: 1.5mm;
+}
+[data-theme="petrine-vedomosti"] .masthead__logo svg { max-height: 168px; width: 100%; }
+
+/* Строка выходных данных под подзаголовком: по центру, между волосяными
+   линейками («Печатаны въ Москвѣ, лѣта 1703…»). */
+[data-theme="petrine-vedomosti"] .masthead__meta {
+  justify-content: center;
+  gap: 10px;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 11.5pt;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  color: #241c10;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 1.5mm;
+}
+
+/* Сплошной трёхколоночный поток. */
+[data-theme="petrine-vedomosti"] .columns-flow {
+  column-count: var(--columns);
+  column-gap: var(--gutter);
+  column-rule: 0.6px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  column-fill: balance;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Рубрика внутри потока: центрированная прописная строка между линейками
+   («ИЗЪ МОСКВЫ», «О ТОРГѢ»). Для кириллицы — uppercase, не small-caps. */
+[data-theme="petrine-vedomosti"] .flow-head {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13.5pt;
+  letter-spacing: 1.4px;
+  text-align: center;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 0.7mm 0;
+  margin: 2mm 0 1.6mm;
+  break-after: avoid;
+  break-inside: avoid;
+  string-set: section content();
+}
+[data-theme="petrine-vedomosti"] .columns-flow > .flow-head:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+
+/* Заметка в потоке. */
+[data-theme="petrine-vedomosti"] .chron { margin: 0 0 1.5mm; }
+[data-theme="petrine-vedomosti"] .chron__head {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11.5pt;
+  letter-spacing: 0.6px;
+  text-align: center;
+  margin: 1mm 0 0.8mm;
+  break-after: avoid;
+}
+[data-theme="petrine-vedomosti"] .chron p {
+  font-family: "Vollkorn", Georgia, serif;
+  font-size: var(--body-size, 11.8pt);
+  line-height: var(--leading, 1.34);
+  text-align: justify;
+  margin: 0 0 1.2mm;
+  orphans: 2;
+  widows: 2;
+}
+
+/* Зачин-врезка места/даты курсивом («Изъ Москвы, генваря въ 2 день.»). */
+[data-theme="petrine-vedomosti"] .chron .story__dateline {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Гравированный мастхед — это и есть «шапка» полосы; гасим базовый running head. */
+@page { @top-center { content: none; } }
+
+/* Одна большая гравированная буквица открывает всю полосу (первая заметка). */
+[data-theme="petrine-vedomosti"] .columns-flow > .chron:first-of-type p:first-of-type::first-letter {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 700;
+  font-size: 4em;
+  line-height: 0.7;
+  float: left;
+  padding: 2px 5px 0 0;
+  color: #6b4a23;
+}

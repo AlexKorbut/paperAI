@@ -1,0 +1,50 @@
+schema_version = 1
+id            = "petrine-vedomosti"
+display_name  = "Петровскія Вѣдомости — 1703"
+mood          = "Первая русская печатная газета: гражданский шрифт Петровской эпохи, гравированный двуглавый орёл, три плотные выключенные колонки кириллицы, волосяные линейки, прописные рубрики внутри колонки, одна большая буквица, пергаментная бумага"
+
+[format]
+page        = "a4"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "bw"
+layout      = "columns"
+
+[grid]
+columns       = 3
+rule_weight   = "0.6px"
+gutter        = "6mm"
+section_order = ["ВѢДОМОСТИ", "ИЗЪ МОСКВЫ", "ИЗЪ ПОЛЬШИ", "О ТОРГѢ"]
+max_lead      = 1
+
+[type]
+masthead_font = "Cormorant Garamond"
+headline_font = "Cormorant Garamond"
+body_font     = "Vollkorn"
+scale         = "classic"
+hyphenate     = true
+# Крупнее микроскопических оригиналов 1703 г. — читаемо, но плотно.
+body_pt       = 11.8
+leading       = 1.34
+
+[colors]
+paper  = "#e7dec2"
+ink    = "#241c10"
+accent = "#6b4a23"
+
+[photo]
+treatment    = "bw"
+max_width_px = 1400
+
+[[fonts]]
+family  = "Cormorant Garamond"
+files   = ["fonts/CormorantGaramond-Regular.woff2", "fonts/CormorantGaramond-Bold.woff2", "fonts/CormorantGaramond-Italic.woff2", "fonts/CormorantGaramond-BoldItalic.woff2"]
+license = "OFL-1.1"
+
+[[fonts]]
+family  = "Vollkorn"
+files   = ["fonts/Vollkorn-Regular.woff2", "fonts/Vollkorn-Bold.woff2", "fonts/Vollkorn-Italic.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"

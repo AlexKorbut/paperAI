@@ -1,0 +1,117 @@
+/* pennsylvania-gazette: колониальная «The Pennsylvania Gazette» Б. Франклина
+   (1750). Каслоновская антиква, гравированная виньетка-картуш в мастхеде, ЧЕТЫРЕ
+   узкие плотные выключенные колонки; капительные рубрики внутри потока; одна
+   гравированная буквица; состаренная серо-бежевая бумага. Латиница; реальные
+   italic-глифы IM Fell используются для зачинов места.
+   Скоупится через [data-theme="…"] (data-theme на <body>). */
+
+body[data-theme="pennsylvania-gazette"] {
+  font-family: "IM Fell English", Georgia, "Times New Roman", serif;
+  background: #e3dcc8;
+  color: #1f1a10;
+}
+
+/* Состаренная серо-бежевая бумага: «фоксинг» по углам, общий тон холоднее London. */
+[data-theme="pennsylvania-gazette"] main.paper {
+  border: 1px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  padding: 2.5mm 5.5mm 3mm;
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(70, 52, 32, 0.06) 0 18%, transparent 54%),
+    radial-gradient(circle at 88% 14%, rgba(70, 52, 32, 0.05) 0 14%, transparent 48%),
+    radial-gradient(circle at 80% 88%, rgba(70, 52, 32, 0.06) 0 16%, transparent 50%),
+    radial-gradient(circle at 50% 52%, rgba(70, 52, 32, 0.03) 0 42%, transparent 72%);
+}
+
+[data-theme="pennsylvania-gazette"] .masthead {
+  border: 0;
+  padding: 1mm 0 0;
+  margin-bottom: 1.5mm;
+}
+[data-theme="pennsylvania-gazette"] .masthead__logo svg { max-height: 150px; width: 100%; }
+
+/* Выходная строка: по центру, между линейками («PHILADELPHIA: Printed by B.
+   Franklin, October 16, 1750.»). */
+[data-theme="pennsylvania-gazette"] .masthead__meta {
+  justify-content: center;
+  gap: 10px;
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 10.5pt;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0.3px;
+  color: #1f1a10;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 1.5mm;
+}
+
+/* Четыре узкие колонки. */
+[data-theme="pennsylvania-gazette"] .columns-flow {
+  column-count: var(--columns);
+  column-gap: var(--gutter);
+  column-rule: 0.5px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  column-fill: balance;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+[data-theme="pennsylvania-gazette"] .flow-head {
+  font-family: "IM Fell English", Georgia, serif;
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: 11.5pt;
+  letter-spacing: 0.6px;
+  text-align: center;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 0.5mm 0;
+  margin: 1.8mm 0 1.4mm;
+  break-after: avoid;
+  break-inside: avoid;
+  string-set: section content();
+}
+[data-theme="pennsylvania-gazette"] .columns-flow > .flow-head:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+
+[data-theme="pennsylvania-gazette"] .chron { margin: 0 0 1.3mm; }
+[data-theme="pennsylvania-gazette"] .chron__head {
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: 10.5pt;
+  letter-spacing: 0.4px;
+  text-align: center;
+  margin: 0.8mm 0 0.7mm;
+  break-after: avoid;
+}
+[data-theme="pennsylvania-gazette"] .chron p {
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: var(--body-size, 10.5pt);
+  line-height: var(--leading, 1.28);
+  text-align: justify;
+  margin: 0 0 1mm;
+  orphans: 2;
+  widows: 2;
+}
+
+[data-theme="pennsylvania-gazette"] .chron .story__dateline {
+  font-weight: 400;
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+@page { @top-center { content: none; } }
+
+[data-theme="pennsylvania-gazette"] .columns-flow > .chron:first-of-type p:first-of-type::first-letter {
+  font-family: "IM Fell English", Georgia, serif;
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.74;
+  float: left;
+  padding: 2px 4px 0 0;
+  color: #1f1a10;
+}

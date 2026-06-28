@@ -198,29 +198,215 @@ _CHRON_ROWS = [
 ]
 
 
-def chronicle_render_document(theme_id: str, *, locale: str = "en", style_overrides: dict | None = None):
-    """The antique continuous-column specimen (layout == "columns")."""
+# ---- Петровскія «Вѣдомости» (1703) — кириллица ----------------------------
+# Стилизованный под первый русский печатный лист контент (с отголосками реальных
+# заметок 1703 г.: пушки, школы, руда на Соку). Лёгкая дореформенная орфография
+# (ъ на концах, ѣ в иконных местах); редкие архаичные глифы при необходимости
+# подменяются системным шрифтом по-глифно, так что «квадратов» не будет.
+_VED_SECTIONS = ["ВѢДОМОСТИ", "ИЗЪ МОСКВЫ", "ИЗЪ ПОЛЬШИ", "О ТОРГѢ"]
+_VED_ROWS = [
+    ("v-ved1", "ВѢДОМОСТИ", "На Москвѣ.",
+     "<p>Повелѣніемъ Его Царскаго Величества вновь нынѣ пушекъ мѣдныхъ, гаубицъ "
+     "и мортиръ вылито четыреста. Тѣ пушки ядромъ по двадцати по четыре, по "
+     "осьмнадцати и по двѣнадцати фунтовъ, а вѣсомъ въ нихъ мѣди тысяча пудовъ.</p>"
+     "<p>Еще на пушечномъ дворѣ многихъ калибровъ припасы готовятъ, и литейному "
+     "дѣлу ученики прилежно навыкаютъ, дабы впредь въ томъ художествѣ нужды не было.</p>"),
+    ("v-ved2", "ВѢДОМОСТИ", None,
+     "<p>Школы московскія умножаются, и сорокъ пять человѣкъ слушаютъ философію, "
+     "и діалектику уже окончили. Въ математико-навигацкой школѣ учениковъ болѣе "
+     "трехъ сотъ, и навыкаютъ изрядно.</p>"),
+    ("v-msk1", "ИЗЪ МОСКВЫ", "Изъ Казани.",
+     "<p>На рѣкѣ Сокѣ нашли много нефти и мѣдной руды; изъ той руды мѣдь "
+     "выплавили изрядну, отчего чаютъ государству прибыль немалую.</p>"
+     "<p>Его Величество указалъ изъ той мѣди и изъ иныхъ припасовъ лить колоколы "
+     "и пушки, и мастеровъ къ тому дѣлу приставить искусныхъ.</p>"),
+    ("v-msk2", "ИЗЪ МОСКВЫ", None,
+     "<p>Изъ Сибири пишутъ: на рѣкахъ сысканы руды серебряныя и желѣзныя, и "
+     "заводы вновь заводятъ. Хлѣбъ нынѣ родился доброй, и торгъ мягкою рухлядью "
+     "противъ прежнихъ лѣтъ великъ.</p>"),
+    ("v-pol1", "ИЗЪ ПОЛЬШИ", "Изо Львова.",
+     "<p>Войска коронныя въ собраніи стоятъ, а о замиреніи доселѣ согласія нѣтъ. "
+     "Изъ Цесарской земли вѣдомость, что полки въ походъ выступили и магазейны "
+     "наполнены.</p>"),
+    ("v-pol2", "ИЗЪ ПОЛЬШИ", "Изъ Амстрадама.",
+     "<p>Корабли изъ Остъ-Индіи пришли съ богатымъ грузомъ, и купечество о томъ "
+     "радуется. Пишутъ такожъ, что въ морѣ были бури великія, отъ чего нѣкоторымъ "
+     "судамъ учинилась поруха.</p>"),
+    ("v-trg1", "О ТОРГѢ", "Въ Архангельскомъ городѣ.",
+     "<p>На ярмонкѣ торгъ былъ великъ: кораблей заморскихъ пришло болѣе ста, и "
+     "товары рускіе — пеньку, ленъ, сало и юфть — раскупили съ охотою.</p>"),
+    ("v-trg2", "О ТОРГѢ", None,
+     "<p>Цѣны на Москвѣ: четверть ржи противъ осени подешевѣла, соль же "
+     "вздорожала за дальнимъ провозомъ. О всемъ ономъ впредь обстоятельно "
+     "вѣдомо будетъ чинено.</p>"),
+]
+
+# ---- Gazette de France (1762) — французский --------------------------------
+_GDF_SECTIONS = ["DE PARIS", "D'ALLEMAGNE", "D'ITALIE", "D'ANGLETERRE", "AVIS DIVERS"]
+_GDF_ROWS = [
+    ("g-par1", "DE PARIS", "De Versailles, le 14 Octobre.",
+     "<p>Le Roi a tenu cette semaine son Conseil, et a daigné recevoir les "
+     "Ambassadeurs des Puissances étrangères, qui ont été présentés à Sa Majesté "
+     "avec les cérémonies accoutumées.</p>"
+     "<p>On a chanté un Te Deum dans la Chapelle du Château, en action de grâces "
+     "des avantages que les armes du Roi ont remportés sur ses ennemis.</p>"),
+    ("g-par2", "DE PARIS", None,
+     "<p>L'Académie Royale des Sciences a tenu son assemblée publique, où "
+     "plusieurs mémoires sur la navigation et l'astronomie ont été lus, et "
+     "reçus avec applaudissement.</p>"),
+    ("g-all1", "D'ALLEMAGNE", "De Vienne, le 28 Septembre.",
+     "<p>L'Impératrice-Reine a donné audience aux Ministres étrangers. On mande "
+     "de l'armée que les troupes ont pris leurs quartiers, et que la campagne "
+     "passée s'est terminée sans action générale.</p>"),
+    ("g-ita1", "D'ITALIE", "De Rome, le 21 Septembre.",
+     "<p>Sa Sainteté a tenu Consistoire, où elle a pourvu plusieurs Églises "
+     "vacantes. Le concours des étrangers est grand cette année, à l'occasion "
+     "des fêtes solennelles.</p>"),
+    ("g-ang1", "D'ANGLETERRE", "De Londres, le 8 Octobre.",
+     "<p>Le Parlement doit s'assembler le mois prochain. La flotte qui était "
+     "dans la Manche est rentrée dans ses ports, les vaisseaux ayant souffert "
+     "des vents contraires.</p>"),
+    ("g-avi1", "AVIS DIVERS", None,
+     "<p>On fait savoir que la foire de Beaucaire a été cette année très "
+     "fréquentée, et que le commerce des soieries y a été considérable.</p>"
+     "<p>Il sera incessamment imprimé une nouvelle Carte du Royaume, dressée sur "
+     "les dernières observations, que l'on trouvera chez le Sieur Imprimeur.</p>"),
+]
+
+# ---- The Pennsylvania Gazette (1750) — английский, колониальный -------------
+_PEN_SECTIONS = ["PHILADELPHIA", "LONDON", "FOREIGN ADVICES", "SHIP NEWS", "ADVERTISEMENTS"]
+_PEN_ROWS = [
+    ("p-phi1", "PHILADELPHIA", "Philadelphia, October 16.",
+     "<p>We hear from Lancaster, that the new settlers continue to come in "
+     "apace, and that the back country fills with industrious families, to the "
+     "great encouragement of trade in these parts.</p>"
+     "<p>On Tuesday last the General Assembly met, and after the usual forms "
+     "proceeded to the business of the province, the particulars whereof shall "
+     "be communicated to our readers in our next.</p>"),
+    ("p-phi2", "PHILADELPHIA", None,
+     "<p>The new market was on Saturday well supplied with provisions, and the "
+     "prices were reasonable; whereby the diligence of our country people is "
+     "made manifest to all.</p>"),
+    ("p-lon1", "LONDON", "London, August 2.",
+     "<p>His Majesty has been pleased to appoint several officers of the "
+     "household. The merchants trading to these colonies have presented an "
+     "address, setting forth the increase of the American commerce.</p>"),
+    ("p-for1", "FOREIGN ADVICES", "Paris, July 28.",
+     "<p>The Court continues at Versailles. Letters from the southern provinces "
+     "advise of a plentiful harvest, and the rivers being navigable, the "
+     "carriage of goods is rendered easy.</p>"),
+    ("p-shp1", "SHIP NEWS", "Custom-House, Philadelphia.",
+     "<p>Entered inward, the snow Dolphin, Job Trueman, from Barbados; the sloop "
+     "Betsey, from Antigua. Cleared out, the brigantine Hope, for Jamaica, and "
+     "the ship Carolina, for Bristol.</p>"),
+    ("p-adv1", "ADVERTISEMENTS", None,
+     "<p>TO BE SOLD, a likely Plantation on the river, containing two hundred "
+     "acres, with a good house, barn, and orchard thereon. Enquire of the "
+     "Printer hereof.</p>"
+     "<p>Just imported, and to be Sold by B. Franklin, a parcel of good Quills, "
+     "Dutch Paper, and the best Crown Soap, at reasonable rates.</p>"),
+    ("p-adv2", "ADVERTISEMENTS", None,
+     "<p>RAN away from the subscriber, a servant man named John; whoever secures "
+     "him so that his master may have him again, shall have Twenty Shillings "
+     "reward, and reasonable charges.</p>"),
+]
+
+# ---- Wiener Zeitung (1703) — немецкий ---------------------------------------
+_WIE_SECTIONS = ["Wien", "Aus dem Reiche", "Aus Welschland", "Frankreich", "Vermischte Nachrichten"]
+_WIE_ROWS = [
+    ("w-wie1", "Wien", "Wien, vom 13. October.",
+     "<p>Ihro Kayserliche Majestät haben heute das Geheime Conseil gehalten, und "
+     "denen fremden Ministris Audienz ertheilet. Von der Armee wird berichtet, "
+     "daß die Völcker in die Winter-Quartiere verleget worden.</p>"
+     "<p>Gestern ist der gantze Hof in die Hof-Capelle gegangen, allwo ein "
+     "solennes Te Deum Laudamus wegen jüngst erhaltenen Vortheils gesungen worden.</p>"),
+    ("w-wie2", "Wien", None,
+     "<p>Es sind allhier Briefe aus Ungarn eingelauffen, welche melden, daß die "
+     "Gräntz-Festungen wohl versehen, und die Läuffte daselbst ruhig seyen.</p>"),
+    ("w-rei1", "Aus dem Reiche", "Regenspurg, vom 5. October.",
+     "<p>Auf dem allgemeinen Reichs-Tag wird über die vorgebrachten Puncten "
+     "fleißig deliberiret. Die Chur-Fürstlichen Gesandten halten täglich "
+     "Conferenzen, und man verhoffet baldige Resolution.</p>"),
+    ("w-wel1", "Aus Welschland", "Rom, vom 28. September.",
+     "<p>Der Heilige Vater haben ein Consistorium gehalten, und unterschiedliche "
+     "erledigte Kirchen besetzet. Der Zulauff fremder Nationen ist dieses Jahr "
+     "ungemein groß.</p>"),
+    ("w-fra1", "Frankreich", "Paris, vom 1. October.",
+     "<p>Der König ist von Fontainebleau wieder anhero gekommen. Die Flotte, so "
+     "in dem Canal gekreutzet, ist wegen widriger Winde in die Häfen "
+     "eingelauffen.</p>"),
+    ("w-ver1", "Vermischte Nachrichten", None,
+     "<p>Man schreibet aus Hamburg, daß die Elbe wegen anhaltenden Regens "
+     "dermaßen angeschwollen, daß das niedrige Land ringsum unter Wasser stehet.</p>"
+     "<p>Aus Holland wird gemeldet, daß die Ost-Indische Compagnie reich "
+     "beladene Schiffe glücklich eingebracht habe.</p>"),
+]
+
+# Registry of antique "columns" specimens, keyed by theme id. Each carries its
+# masthead date line (the SVG masthead supplies the title/sub-title), the ordered
+# small-caps section heads, and its period rows. London is the default fallback.
+# In production the user's real (e.g. Russian) content flows into the SAME layout.
+_SPECIMENS: dict[str, dict] = {
+    "london-chronicle": {
+        "title": "The London Chronicle", "locale": "en",
+        "date": "From SATURDAY, October 13, to TUESDAY, October 16, 1759.",
+        "sections": _CHRON_SECTIONS, "rows": _CHRON_ROWS,
+    },
+    "petrine-vedomosti": {
+        "title": "Вѣдомости", "locale": "ru",
+        "date": "Печатаны въ Москвѣ, лѣта 1703, генваря въ 2 день.",
+        "sections": _VED_SECTIONS, "rows": _VED_ROWS,
+    },
+    "gazette-de-france": {
+        "title": "Gazette de France", "locale": "fr",
+        "date": "De Paris, le 16 Octobre 1762.",
+        "sections": _GDF_SECTIONS, "rows": _GDF_ROWS,
+    },
+    "pennsylvania-gazette": {
+        "title": "The Pennsylvania Gazette", "locale": "en",
+        "date": "PHILADELPHIA: Printed by B. Franklin, October 16, 1750.",
+        "sections": _PEN_SECTIONS, "rows": _PEN_ROWS,
+    },
+    "wiener-zeitung": {
+        "title": "Wiener Zeitung", "locale": "de",
+        "date": "Wien, den 16. October 1703.",
+        "sections": _WIE_SECTIONS, "rows": _WIE_ROWS,
+    },
+}
+
+
+def chronicle_render_document(theme_id: str, *, locale: str | None = None, style_overrides: dict | None = None):
+    """The antique continuous-column specimen (layout == "columns").
+
+    Picks a period- and language-correct specimen for the theme (Russian for
+    petrine-vedomosti, French for gazette-de-france, etc.); unknown ids fall back
+    to the London Chronicle. The masthead SVG carries the title; the meta line
+    shows only the period date.
+    """
+    spec = _SPECIMENS.get(theme_id, _SPECIMENS["london-chronicle"])
+    loc = locale or spec["locale"]
+    cols = min(load_manifest(theme_id).grid.columns, 6)
     stories = [
         Story(id=cid, section=section, kind="standard", headline="",
               dateline=dateline, body_html=body, byline=None,
-              source="The London Chronicle", source_url="#")
-        for cid, section, dateline, body in _CHRON_ROWS
+              source=spec["title"], source_url="#")
+        for cid, section, dateline, body in spec["rows"]
     ]
     grid = GridPlan(
         page_format=load_manifest(theme_id).format.page,
-        section_order=_CHRON_SECTIONS,
+        section_order=spec["sections"],
         slots=[
-            GridSlot(story_id=cid, section=section, size="medium", columns=3)
-            for cid, section, _dl, _body in _CHRON_ROWS
+            GridSlot(story_id=cid, section=section, size="medium", columns=cols)
+            for cid, section, _dl, _body in spec["rows"]
         ],
     )
     doc = build_render_document(
-        issue_id="chronicle-0437", theme_id=theme_id, locale=locale,
-        title="The London Chronicle", stories=stories, grid_plan=grid,
+        issue_id=f"{theme_id}-specimen", theme_id=theme_id, locale=loc,
+        title=spec["title"], stories=stories, grid_plan=grid,
         style_overrides=style_overrides or {},
     )
-    # The masthead SVG carries Vol/Nº; the meta line shows the period date range.
-    doc.masthead.date = "From SATURDAY, October 13, to TUESDAY, October 16, 1759."
+    # The masthead SVG carries the title/Nº; the meta line shows the period date.
+    doc.masthead.date = spec["date"]
     return doc
 
 

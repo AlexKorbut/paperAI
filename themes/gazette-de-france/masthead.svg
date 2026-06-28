@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 196" role="img" aria-label="Gazette de France">
+  <!-- Тонко-толстая линейка сверху -->
+  <g fill="#2a2418">
+    <rect x="0" y="2" width="900" height="2.4"/>
+    <rect x="0" y="8" width="900" height="0.7"/>
+  </g>
+
+  <!-- «Avec Privilège du Roi» / номер -->
+  <text x="16" y="40" font-family="'EB Garamond', Georgia, serif"
+        font-size="15" font-style="italic" letter-spacing="0.5" fill="#7a5a2a">Avec Privilège du Roi</text>
+  <text x="884" y="40" text-anchor="end" font-family="'EB Garamond', Georgia, serif"
+        font-size="15" letter-spacing="1" fill="#7a5a2a">N&#176; 83.</text>
+
+  <!-- Королевские лилии: крупная по центру, две меньшие по бокам -->
+  <g fill="#7a5a2a">
+    <g id="lys">
+      <path d="M0,-28 C4,-18 4,-9 0,-4 C-4,-9 -4,-18 0,-28 Z"/>
+      <path d="M0,-2 C4,-12 13,-16 17,-7 C20,0 12,5 5,1 C9,6 4,9 0,3 Z"/>
+      <path d="M0,-2 C-4,-12 -13,-16 -17,-7 C-20,0 -12,5 -5,1 C-9,6 -4,9 0,3 Z"/>
+      <rect x="-13" y="2.5" width="26" height="4" rx="2"/>
+      <path d="M0,7 C7,15 9,21 0,28 C-9,21 -7,15 0,7 Z"/>
+    </g>
+    <use href="#lys" transform="translate(450,46)"/>
+    <use href="#lys" transform="translate(356,50) scale(0.62)"/>
+    <use href="#lys" transform="translate(544,50) scale(0.62)"/>
+  </g>
+
+  <!-- Титул -->
+  <text x="450" y="128" text-anchor="middle"
+        font-family="'EB Garamond', Georgia, serif"
+        font-size="58" font-weight="700" letter-spacing="3" fill="#2a2418">GAZETTE</text>
+  <text x="450" y="160" text-anchor="middle"
+        font-family="'EB Garamond', Georgia, serif"
+        font-size="27" letter-spacing="8" fill="#2a2418">DE FRANCE</text>
+
+  <!-- Толсто-тонкая линейка снизу -->
+  <g fill="#2a2418">
+    <rect x="0" y="174" width="900" height="0.7"/>
+    <rect x="0" y="179" width="900" height="2.4"/>
+  </g>
+</svg>

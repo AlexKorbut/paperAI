@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" role="img" aria-label="Wiener Zeitung">
+  <!-- Толсто-тонкая линейка сверху -->
+  <g fill="#20201c">
+    <rect x="0" y="2" width="900" height="2.6"/>
+    <rect x="0" y="8" width="900" height="0.8"/>
+  </g>
+
+  <!-- Nº / привилегия -->
+  <text x="16" y="40" font-family="'EB Garamond', Georgia, serif"
+        font-size="15" font-variant="small-caps" letter-spacing="1" fill="#4a3a26">Privilegirt</text>
+  <text x="884" y="40" text-anchor="end" font-family="'EB Garamond', Georgia, serif"
+        font-size="15" letter-spacing="1" fill="#4a3a26">Num. 14.</text>
+
+  <!-- Имперский двуглавый орёл -->
+  <g fill="#20201c" stroke="#20201c" stroke-width="0.6">
+    <g transform="translate(450,0)">
+      <path d="M -22 28 Q -11 14 0 26 Q 11 14 22 28 L 18 34 L -18 34 Z"/>
+      <circle cx="-22" cy="27" r="3"/><circle cx="0" cy="23" r="3"/><circle cx="22" cy="27" r="3"/>
+      <rect x="-1.4" y="13" width="2.8" height="9"/>
+      <rect x="-5" y="16.5" width="10" height="2.4"/>
+      <rect x="-13" y="34" width="26" height="3.2"/>
+    </g>
+    <path d="M 450 44 Q 470 60 466 92 Q 458 104 450 110 Q 442 104 434 92 Q 430 60 450 44 Z"
+          fill="#e4e1d6" stroke="#20201c" stroke-width="1.1"/>
+    <g id="half">
+      <ellipse cx="479" cy="50" rx="12" ry="9.5"/>
+      <path d="M 490 48 L 506 45 L 506 49 L 491 53 Z"/>
+      <circle cx="481" cy="48.5" r="1.6" fill="#e4e1d6" stroke="none"/>
+      <path d="M 460 58
+               Q 492 56 520 70
+               Q 540 80 548 100
+               Q 532 92 520 92
+               Q 528 100 524 112
+               Q 512 102 502 102
+               Q 508 112 502 122
+               Q 488 110 476 104
+               Q 466 84 460 58 Z"/>
+      <circle cx="486" cy="124" r="7" fill="#e4e1d6" stroke="#20201c" stroke-width="1.1"/>
+      <path d="M 486 117 v 14 M 479 124 h 14" stroke="#20201c" stroke-width="0.9"/>
+    </g>
+    <use href="#half" transform="translate(900,0) scale(-1,1)"/>
+    <path d="M 438 110 L 450 150 L 462 110 Q 450 120 438 110 Z"/>
+  </g>
+
+  <!-- Титул фрактурой -->
+  <text x="450" y="196" text-anchor="middle"
+        font-family="'UnifrakturCook', serif"
+        font-size="56" font-weight="700" fill="#20201c">Wiener Zeitung</text>
+
+  <!-- Толсто-тонкая линейка снизу -->
+  <g fill="#20201c">
+    <rect x="0" y="208" width="900" height="0.8"/>
+    <rect x="0" y="213" width="900" height="2.6"/>
+  </g>
+</svg>

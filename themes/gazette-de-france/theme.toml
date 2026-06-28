@@ -1,0 +1,45 @@
+schema_version = 1
+id            = "gazette-de-france"
+display_name  = "Gazette de France — 1762"
+mood          = "Французская королевская газета эпохи Ancien Régime: гарамоновская антиква, королевские лилии и флероны, два широких выключенных столбца на бумаге цвета слоновой кости, тонкие линейки, капительные рубрики, гравированная буквица"
+
+[format]
+page        = "a4"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "duotone"
+duotone     = ["#2a2418", "#7a5a2a"]
+layout      = "columns"
+
+[grid]
+columns       = 2
+rule_weight   = "0.5px"
+gutter        = "8mm"
+section_order = ["DE PARIS", "D'ALLEMAGNE", "D'ITALIE", "D'ANGLETERRE", "AVIS DIVERS"]
+max_lead      = 1
+
+[type]
+masthead_font = "EB Garamond"
+headline_font = "EB Garamond"
+body_font     = "EB Garamond"
+scale         = "classic"
+hyphenate     = true
+body_pt       = 12.0
+leading       = 1.36
+
+[colors]
+paper  = "#efe7d2"
+ink    = "#2a2418"
+accent = "#7a5a2a"
+
+[photo]
+treatment    = "bw"
+max_width_px = 1400
+
+[[fonts]]
+family  = "EB Garamond"
+files   = ["fonts/EBGaramond-Regular.woff2", "fonts/EBGaramond-Bold.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"

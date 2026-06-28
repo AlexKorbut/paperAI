@@ -1,0 +1,123 @@
+/* gazette-de-france: королевская «Gazette de France» (1762). Гарамоновская
+   антиква, королевские лилии (fleur-de-lis) и флероны, ДВА широких выключенных
+   столбца на бумаге цвета слоновой кости; капительные рубрики с лилиями внутри
+   потока; гравированная буквица акцентного «золота». Латиница, реальные italic-
+   глифы EB Garamond не поставляются, поэтому зачины — капительные роман (не курсив).
+   Скоупится через [data-theme="…"] (data-theme на <body>). */
+
+body[data-theme="gazette-de-france"] {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  background: #efe7d2;
+  color: #2a2418;
+}
+
+/* Бумага слоновой кости: чистая, без «грязи», лёгкий тёплый виньет. */
+[data-theme="gazette-de-france"] main.paper {
+  border: 0.6px solid color-mix(in srgb, var(--ink) 40%, transparent);
+  padding: 3mm 7mm 3.5mm;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(122, 90, 42, 0.05) 0 30%, transparent 64%),
+    radial-gradient(circle at 50% 100%, rgba(122, 90, 42, 0.04) 0 24%, transparent 58%);
+}
+
+[data-theme="gazette-de-france"] .masthead {
+  border: 0;
+  padding: 1mm 0 0;
+  margin-bottom: 1.5mm;
+}
+[data-theme="gazette-de-france"] .masthead__logo svg { max-height: 150px; width: 100%; }
+
+/* Выходная строка: по центру, между линейками («De Paris, le 16 Octobre 1762»). */
+[data-theme="gazette-de-france"] .masthead__meta {
+  justify-content: center;
+  gap: 12px;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 11.5pt;
+  font-style: normal;
+  font-variant: small-caps;
+  letter-spacing: 1px;
+  text-transform: none;
+  color: #2a2418;
+  border-top: 0.5px solid var(--ink);
+  border-bottom: 0.5px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 1.5mm;
+}
+
+/* Два широких столбца. */
+[data-theme="gazette-de-france"] .columns-flow {
+  column-count: var(--columns);
+  column-gap: var(--gutter);
+  column-rule: 0.5px solid color-mix(in srgb, var(--ink) 45%, transparent);
+  column-fill: balance;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Рубрика с лилиями по краям («✶ DE PARIS ✶»). */
+[data-theme="gazette-de-france"] .flow-head {
+  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 700;
+  font-variant: small-caps;
+  font-size: 14pt;
+  letter-spacing: 1.6px;
+  text-align: center;
+  color: #2a2418;
+  border-top: 0.5px solid var(--ink);
+  border-bottom: 0.5px solid var(--ink);
+  padding: 0.7mm 0;
+  margin: 2.4mm 0 1.8mm;
+  break-after: avoid;
+  break-inside: avoid;
+  string-set: section content();
+}
+[data-theme="gazette-de-france"] .flow-head::before { content: "\269C\00A0\00A0"; color: #7a5a2a; }
+[data-theme="gazette-de-france"] .flow-head::after  { content: "\00A0\00A0\269C"; color: #7a5a2a; }
+[data-theme="gazette-de-france"] .columns-flow > .flow-head:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+
+[data-theme="gazette-de-france"] .chron { margin: 0 0 1.6mm; }
+[data-theme="gazette-de-france"] .chron__head {
+  font-variant: small-caps;
+  font-weight: 700;
+  font-size: 12pt;
+  letter-spacing: 0.6px;
+  text-align: center;
+  margin: 1mm 0 0.8mm;
+  break-after: avoid;
+}
+[data-theme="gazette-de-france"] .chron p {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: var(--body-size, 12pt);
+  line-height: var(--leading, 1.36);
+  text-align: justify;
+  margin: 0 0 1.3mm;
+  orphans: 2;
+  widows: 2;
+}
+
+/* Зачин-врезка места: капительная роман, акцентный цвет («De Versailles.»). */
+[data-theme="gazette-de-france"] .chron .story__dateline {
+  font-weight: 700;
+  font-style: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.6px;
+  text-transform: none;
+  color: #7a5a2a;
+}
+
+@page { @top-center { content: none; } }
+
+/* Гравированная буквица «золотом» открывает полосу. */
+[data-theme="gazette-de-france"] .columns-flow > .chron:first-of-type p:first-of-type::first-letter {
+  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 700;
+  font-size: 3.6em;
+  line-height: 0.74;
+  float: left;
+  padding: 2px 5px 0 0;
+  color: #7a5a2a;
+}

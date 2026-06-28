@@ -1,0 +1,119 @@
+/* wiener-zeitung: «Wiener Zeitung» (1703) — старейшая немецкоязычная газета.
+   Фрактурный мастхед с имперским двуглавым орлом, гарамоновский текст в ДВУХ
+   выключенных столбцах; готические (фрактурные) рубрики внутри потока; одна
+   гравированная буквица; холодная серо-бумажная фактура. Латиница/немецкий.
+   Рубрики набраны фрактурой в смешанном регистре (фрактурные капители ажурны),
+   зачины места — капительная роман EB Garamond (italic-файла нет).
+   Скоупится через [data-theme="…"] (data-theme на <body>). */
+
+body[data-theme="wiener-zeitung"] {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  background: #e4e1d6;
+  color: #20201c;
+}
+
+/* Холодная серо-бумажная фактура: едва заметные пятна, без тёплой сепии. */
+[data-theme="wiener-zeitung"] main.paper {
+  border: 1px solid color-mix(in srgb, var(--ink) 42%, transparent);
+  padding: 2.5mm 7mm 3mm;
+  background-image:
+    radial-gradient(circle at 16% 12%, rgba(74, 58, 38, 0.045) 0 18%, transparent 54%),
+    radial-gradient(circle at 84% 86%, rgba(74, 58, 38, 0.05) 0 16%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(40, 40, 36, 0.03) 0 40%, transparent 72%);
+}
+
+[data-theme="wiener-zeitung"] .masthead {
+  border: 0;
+  padding: 1mm 0 0;
+  margin-bottom: 1.5mm;
+}
+[data-theme="wiener-zeitung"] .masthead__logo svg { max-height: 170px; width: 100%; }
+
+/* Выходная строка: по центру, между линейками («Wien, den 16. October 1703»). */
+[data-theme="wiener-zeitung"] .masthead__meta {
+  justify-content: center;
+  gap: 10px;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 11pt;
+  font-variant: small-caps;
+  letter-spacing: 0.8px;
+  text-transform: none;
+  color: #20201c;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 1mm 0;
+  margin-top: 1.5mm;
+}
+
+/* Два выключенных столбца. */
+[data-theme="wiener-zeitung"] .columns-flow {
+  column-count: var(--columns);
+  column-gap: var(--gutter);
+  column-rule: 0.6px solid color-mix(in srgb, var(--ink) 50%, transparent);
+  column-fill: balance;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+/* Рубрика фрактурой в потоке («Wien», «Aus dem Reiche»). */
+[data-theme="wiener-zeitung"] .flow-head {
+  font-family: "UnifrakturCook", "UnifrakturMaguntia", serif;
+  font-weight: 700;
+  font-size: 19pt;
+  letter-spacing: 0.5px;
+  text-align: center;
+  border-top: 0.6px solid var(--ink);
+  border-bottom: 0.6px solid var(--ink);
+  padding: 0.4mm 0;
+  margin: 2mm 0 1.5mm;
+  break-after: avoid;
+  break-inside: avoid;
+  string-set: section content();
+}
+[data-theme="wiener-zeitung"] .columns-flow > .flow-head:first-child {
+  border-top: 0;
+  margin-top: 0;
+}
+
+[data-theme="wiener-zeitung"] .chron { margin: 0 0 1.5mm; }
+[data-theme="wiener-zeitung"] .chron__head {
+  font-family: "UnifrakturCook", serif;
+  font-weight: 700;
+  font-size: 14pt;
+  text-align: center;
+  margin: 1mm 0 0.7mm;
+  break-after: avoid;
+}
+[data-theme="wiener-zeitung"] .chron p {
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: var(--body-size, 11.5pt);
+  line-height: var(--leading, 1.32);
+  text-align: justify;
+  margin: 0 0 1.2mm;
+  orphans: 2;
+  widows: 2;
+}
+
+/* Зачин-врезка места: капительная роман, акцентный цвет («Wien.»). */
+[data-theme="wiener-zeitung"] .chron .story__dateline {
+  font-weight: 700;
+  font-style: normal;
+  font-variant: small-caps;
+  letter-spacing: 0.5px;
+  text-transform: none;
+  color: #4a3a26;
+}
+
+@page { @top-center { content: none; } }
+
+/* Гравированная буквица открывает полосу. */
+[data-theme="wiener-zeitung"] .columns-flow > .chron:first-of-type p:first-of-type::first-letter {
+  font-family: "UnifrakturCook", serif;
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.78;
+  float: left;
+  padding: 2px 5px 0 0;
+  color: #4a3a26;
+}

@@ -1,0 +1,49 @@
+schema_version = 1
+id            = "wiener-zeitung"
+display_name  = "Wiener Zeitung — 1703"
+mood          = "Старейшая немецкоязычная газета: фрактурный мастхед, имперский двуглавый орёл, гарамоновский текст в двух выключенных столбцах, готические рубрики внутри колонки, гравированная буквица, холодная серо-бумажная фактура"
+
+[format]
+page        = "a4"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "bw"
+layout      = "columns"
+
+[grid]
+columns       = 2
+rule_weight   = "0.6px"
+gutter        = "8mm"
+section_order = ["Wien", "Aus dem Reiche", "Aus Welschland", "Frankreich", "Vermischte Nachrichten"]
+max_lead      = 1
+
+[type]
+masthead_font = "UnifrakturCook"
+headline_font = "UnifrakturCook"
+body_font     = "EB Garamond"
+scale         = "classic"
+hyphenate     = true
+body_pt       = 11.5
+leading       = 1.32
+
+[colors]
+paper  = "#e4e1d6"
+ink    = "#20201c"
+accent = "#4a3a26"
+
+[photo]
+treatment    = "bw"
+max_width_px = 1400
+
+[[fonts]]
+family  = "UnifrakturCook"
+files   = ["fonts/UnifrakturCook-Regular.woff2"]
+license = "OFL-1.1"
+
+[[fonts]]
+family  = "EB Garamond"
+files   = ["fonts/EBGaramond-Regular.woff2", "fonts/EBGaramond-Bold.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"

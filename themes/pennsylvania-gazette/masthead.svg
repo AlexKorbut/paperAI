@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 184" role="img" aria-label="The Pennsylvania Gazette">
+  <!-- Толсто-тонкая линейка сверху -->
+  <g fill="#1f1a10">
+    <rect x="0" y="2" width="900" height="2.4"/>
+    <rect x="0" y="8" width="900" height="0.7"/>
+  </g>
+
+  <!-- Numb. / год -->
+  <text x="16" y="40" font-family="'IM Fell English', Georgia, serif"
+        font-size="15" letter-spacing="1" fill="#463420">Numb. 1142.</text>
+  <text x="884" y="40" text-anchor="end" font-family="'IM Fell English', Georgia, serif"
+        font-size="15" font-style="italic" letter-spacing="0.5" fill="#463420">Price Three-Pence.</text>
+
+  <!-- Гравированный картуш-флёрон по центру над титулом -->
+  <g fill="none" stroke="#463420" stroke-width="1.2">
+    <path d="M 450 24 C 430 18 408 22 398 34 C 414 32 432 34 450 40 C 468 34 486 32 502 34 C 492 22 470 18 450 24 Z" fill="#463420" stroke="none"/>
+    <path d="M 398 34 C 386 38 380 48 384 56 C 392 50 398 46 404 46" />
+    <path d="M 502 34 C 514 38 520 48 516 56 C 508 50 502 46 496 46" />
+    <circle cx="450" cy="33" r="3.4" fill="#463420" stroke="none"/>
+  </g>
+
+  <!-- Титул каслоновской антиквой -->
+  <text x="450" y="108" text-anchor="middle"
+        font-family="'IM Fell English', Georgia, serif"
+        font-size="50" letter-spacing="1.5" fill="#1f1a10">The Pennsylvania Gazette</text>
+
+  <!-- Подзаголовок разрядкой -->
+  <text x="450" y="138" text-anchor="middle"
+        font-family="'IM Fell English', Georgia, serif"
+        font-size="15" font-style="italic" letter-spacing="2" fill="#1f1a10">Containing the freshest Advices, Foreign and Domestick.</text>
+
+  <!-- Тонко-толстая линейка снизу -->
+  <g fill="#1f1a10">
+    <rect x="0" y="162" width="900" height="0.7"/>
+    <rect x="0" y="167" width="900" height="2.4"/>
+  </g>
+</svg>

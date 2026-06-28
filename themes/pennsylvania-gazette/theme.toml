@@ -1,0 +1,45 @@
+schema_version = 1
+id            = "pennsylvania-gazette"
+display_name  = "The Pennsylvania Gazette — 1750"
+mood          = "Колониальная американская газета Б. Франклина: каслоновская антиква, гравированная виньетка-картуш в мастхеде, четыре плотные узкие выключенные колонки, волосяные линейки, капительные рубрики, гравированная буквица, состаренная серо-бежевая бумага"
+
+[format]
+page        = "a4"
+orientation = "portrait"
+bleed_mm    = 0
+color_mode  = "bw"
+layout      = "columns"
+
+[grid]
+columns       = 4
+rule_weight   = "0.5px"
+gutter        = "5mm"
+section_order = ["PHILADELPHIA", "LONDON", "FOREIGN ADVICES", "SHIP NEWS", "ADVERTISEMENTS"]
+max_lead      = 1
+
+[type]
+masthead_font = "IM Fell English"
+headline_font = "IM Fell English"
+body_font     = "IM Fell English"
+scale         = "classic"
+hyphenate     = true
+# Узкие колонии-колонки набирались мелко; держим читаемый, но плотный кегль.
+body_pt       = 10.5
+leading       = 1.28
+
+[colors]
+paper  = "#e3dcc8"
+ink    = "#1f1a10"
+accent = "#463420"
+
+[photo]
+treatment    = "bw"
+max_width_px = 1400
+
+[[fonts]]
+family  = "IM Fell English"
+files   = ["fonts/IMFellEnglish-Regular.woff2", "fonts/IMFellEnglish-Italic.woff2"]
+license = "OFL-1.1"
+
+[assets]
+masthead = "masthead.svg"
