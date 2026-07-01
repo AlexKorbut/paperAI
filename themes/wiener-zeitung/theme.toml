@@ -11,7 +11,7 @@ color_mode  = "bw"
 layout      = "columns"
 
 [grid]
-columns       = 2
+columns       = 3
 rule_weight   = "0.6px"
 gutter        = "8mm"
 section_order = ["Wien", "Aus dem Reiche", "Aus Welschland", "Frankreich", "Vermischte Nachrichten"]
