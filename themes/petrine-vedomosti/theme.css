@@ -17,7 +17,7 @@ body[data-theme="petrine-vedomosti"] {
   border: 1.4px double color-mix(in srgb, var(--ink) 60%, transparent);
   outline: 0.5px solid color-mix(in srgb, var(--ink) 35%, transparent);
   outline-offset: 1.4mm;
-  padding: 3mm 6mm 3.5mm;
+  padding: 0 6mm;   /* horizontal only: vertical padding breaks Paged.js multi-page multicol */
   background-image:
     radial-gradient(circle at 14% 12%, rgba(107, 74, 35, 0.06) 0 18%, transparent 56%),
     radial-gradient(circle at 86% 84%, rgba(107, 74, 35, 0.07) 0 16%, transparent 50%),

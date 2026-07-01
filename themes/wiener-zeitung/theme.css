@@ -15,7 +15,7 @@ body[data-theme="wiener-zeitung"] {
 /* Холодная серо-бумажная фактура: едва заметные пятна, без тёплой сепии. */
 [data-theme="wiener-zeitung"] main.paper {
   border: 1px solid color-mix(in srgb, var(--ink) 42%, transparent);
-  padding: 2.5mm 7mm 3mm;
+  padding: 0 7mm;   /* horizontal only: vertical padding breaks Paged.js multi-page multicol */
   background-image:
     radial-gradient(circle at 16% 12%, rgba(74, 58, 38, 0.045) 0 18%, transparent 54%),
     radial-gradient(circle at 84% 86%, rgba(74, 58, 38, 0.05) 0 16%, transparent 50%),

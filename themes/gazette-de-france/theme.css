@@ -14,7 +14,7 @@ body[data-theme="gazette-de-france"] {
 /* Бумага слоновой кости: чистая, без «грязи», лёгкий тёплый виньет. */
 [data-theme="gazette-de-france"] main.paper {
   border: 0.6px solid color-mix(in srgb, var(--ink) 40%, transparent);
-  padding: 3mm 7mm 3.5mm;
+  padding: 0 7mm;   /* horizontal only: vertical padding breaks Paged.js multi-page multicol */
   background-image:
     radial-gradient(circle at 50% 0%, rgba(122, 90, 42, 0.05) 0 30%, transparent 64%),
     radial-gradient(circle at 50% 100%, rgba(122, 90, 42, 0.04) 0 24%, transparent 58%);
