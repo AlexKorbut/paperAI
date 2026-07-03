@@ -4,6 +4,7 @@
 output_lang = "ru"        # newspaper language; sources stay multilingual
 theme = "times-classic"
 page_format = "a4"
+spreads = 2               # количество разворотов в выпуске (1 разворот = 2 полосы)
 
 [models]
 tagging = "claude-haiku-4-5"

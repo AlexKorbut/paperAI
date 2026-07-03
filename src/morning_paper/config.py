@@ -6,7 +6,7 @@ import tomllib
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]  # morning-paper/
@@ -19,6 +19,14 @@ class Defaults(BaseModel):
     output_lang: str = "ru"
     theme: str = "times-classic"
     page_format: str = "a4"
+    # Number of SPREADS (разворотов) an issue targets. One spread = two facing
+    # pages, so the target page count is `spreads * 2`. Drives how much content
+    # a generated issue holds (see scripts/build_vedomosti_ru_big.py).
+    spreads: int = Field(default=2, ge=1, le=8)
+
+    @property
+    def target_pages(self) -> int:
+        return self.spreads * 2
 
 
 class ModelRouting(BaseModel):
