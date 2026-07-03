@@ -32,16 +32,28 @@ export async function printPdf({ html, baseUrl, outPath, rendererDir }) {
 
     await page.setContent(withBase, { waitUntil: "networkidle" });
 
-    // Inject and run Paged.js to break content into @page-sized pages.
-    await page.addScriptTag({ content: polyfill });
-    await page.waitForFunction(
-      () => window.PagedPolyfill && document.querySelector(".pagedjs_pages"),
-      { timeout: 60000 }
-    );
+    // Wait for the theme's @font-face files to load and register an `after`
+    // hook so we know when Paged.js has FULLY finished. Without this the count
+    // is read (and page.pdf can fire) mid-pagination, so the same input yields
+    // a different page count run-to-run — and text is measured with fallback
+    // font metrics. Paged.js still auto-runs once on inject.
+    await page.evaluate(async () => {
+      if (document.fonts && document.fonts.ready) {
+        await document.fonts.ready;
+      }
+      window.PagedConfig = {
+        after: (flow) => {
+          window.__pagedTotal =
+            (flow && flow.total) ||
+            document.querySelectorAll(".pagedjs_page").length;
+        },
+      };
+    });
 
-    const pageCount = await page.evaluate(
-      () => document.querySelectorAll(".pagedjs_page").length
-    );
+    await page.addScriptTag({ content: polyfill });
+    const pageCount = await page
+      .waitForFunction(() => window.__pagedTotal || null, { timeout: 120000 })
+      .then((h) => h.jsonValue());
 
     await page.pdf({
       path: outPath,
